@@ -1,0 +1,2 @@
+# Run the quality gate before commits.
+pnpm run check

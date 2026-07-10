@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+build/
+
+# Test and tool caches
+coverage/
+
+# VS Code config
+.vscode/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Local environment
+.env
