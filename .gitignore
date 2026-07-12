@@ -19,3 +19,6 @@ coverage/
 
 # Local environment
 .env
+
+# Incremental specs
+.sdd

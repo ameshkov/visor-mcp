@@ -1,0 +1,24 @@
+{
+  "name": "mcp-tester",
+  "version": "0.0.0",
+  "private": true,
+  "description": "E2E fixture runner for the vision-mcp MCP server",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "start:live": "MCP_TESTER_LIVE=1 tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.24.3",
+    "dotenv": "17.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.2",
+    "tsx": "4.20.3",
+    "typescript": "5.9.3"
+  }
+}
