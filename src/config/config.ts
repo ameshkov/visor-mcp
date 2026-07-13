@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { join } from 'node:path';
 import { ConfigError } from './errors.js';
 
-// ServerConfig is now consumed by server.ts, tools.ts, and provider.ts, so it
+// ServerConfig is now consumed by server.ts, tools/, and provider.ts, so it
 // is exported. `LoadConfigOptions` stays module-private.
 export interface ServerConfig {
   readonly apiKey: string;

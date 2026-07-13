@@ -6,6 +6,16 @@ import {
   TINY_PNG_BASE64,
   TINY_PNG_DATA_URL,
   TINY_PNG_BYTES,
+  TINY_JPEG_DATA_URL,
+  TINY_JPEG_BASE64,
+  TINY_JPEG_BYTES,
+  TINY_WEBP_DATA_URL,
+  TINY_WEBP_BASE64,
+  TINY_WEBP_BYTES,
+  TINY_GIF_DATA_URL,
+  TINY_GIF_BASE64,
+  TINY_GIF_BYTES,
+  TINY_ANIMATED_GIF_BYTES,
   writeTempFile,
   createTempDir,
   startMockImageServer,
@@ -41,13 +51,26 @@ describe('loadImage data URL', () => {
     await expect(loadImage(TINY_PNG_DATA_URL, 1e-6)).rejects.toThrow(/size limit/);
   });
 
-  it.each([
-    ['SVG text', Buffer.from('<svg></svg>').toString('base64')],
-    ['JPEG magic bytes', Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0]).toString('base64')],
-  ])('rejects non-PNG bytes: %s', async (_name, base64) => {
-    await expect(loadImage(`data:image/png;base64,${base64}`, 5)).rejects.toThrow(
-      /supported format/,
-    );
+  it('rejects SVG bytes as an unsupported format', async () => {
+    const svg = Buffer.from('<svg></svg>').toString('base64');
+    await expect(loadImage(`data:image/png;base64,${svg}`, 5)).rejects.toThrow(/supported format/);
+  });
+
+  it('accepts a JPEG data URL and canonicalizes it', async () => {
+    const image = await loadImage(TINY_JPEG_DATA_URL, 5);
+    expect(image.mimeType).toBe('image/jpeg');
+    expect(image.dataUrl).toBe(`data:image/jpeg;base64,${TINY_JPEG_BASE64}`);
+  });
+
+  it('accepts a static GIF data URL and canonicalizes it', async () => {
+    const image = await loadImage(TINY_GIF_DATA_URL, 5);
+    expect(image.mimeType).toBe('image/gif');
+    expect(image.dataUrl).toBe(`data:image/gif;base64,${TINY_GIF_BASE64}`);
+  });
+
+  it('rejects an animated GIF data URL as unsupported', async () => {
+    const animated = `data:image/gif;base64,${Buffer.from(TINY_ANIMATED_GIF_BYTES).toString('base64')}`;
+    await expect(loadImage(animated, 5)).rejects.toThrow(/supported format/);
   });
 });
 
@@ -270,6 +293,112 @@ describe('startMockImageServer', () => {
       expect(server.requests[0].authorization).toBeUndefined();
     } finally {
       await server.close();
+    }
+  });
+});
+
+describe('loadImage format matrix across source kinds', () => {
+  let server: MockImageServer;
+  beforeEach(async () => {
+    server = await startMockImageServer();
+    server.setRoute('/png', { status: 200, body: Buffer.from(TINY_PNG_BYTES) });
+    server.setRoute('/jpeg', { status: 200, body: Buffer.from(TINY_JPEG_BYTES) });
+    server.setRoute('/webp', { status: 200, body: Buffer.from(TINY_WEBP_BYTES) });
+    server.setRoute('/gif', { status: 200, body: Buffer.from(TINY_GIF_BYTES) });
+  });
+  afterEach(async () => {
+    await server.close();
+  });
+
+  const FIXTURES = [
+    {
+      label: 'PNG',
+      dataUrl: TINY_PNG_DATA_URL,
+      bytes: TINY_PNG_BYTES,
+      base64: TINY_PNG_BASE64,
+      mime: 'image/png',
+      route: '/png',
+      filename: 'image.png',
+    },
+    {
+      label: 'JPEG',
+      dataUrl: TINY_JPEG_DATA_URL,
+      bytes: TINY_JPEG_BYTES,
+      base64: TINY_JPEG_BASE64,
+      mime: 'image/jpeg',
+      route: '/jpeg',
+      filename: 'image.jpg',
+    },
+    {
+      label: 'WebP',
+      dataUrl: TINY_WEBP_DATA_URL,
+      bytes: TINY_WEBP_BYTES,
+      base64: TINY_WEBP_BASE64,
+      mime: 'image/webp',
+      route: '/webp',
+      filename: 'image.webp',
+    },
+    {
+      label: 'static GIF',
+      dataUrl: TINY_GIF_DATA_URL,
+      bytes: TINY_GIF_BYTES,
+      base64: TINY_GIF_BASE64,
+      mime: 'image/gif',
+      route: '/gif',
+      filename: 'image.gif',
+    },
+  ] as const;
+
+  for (const f of FIXTURES) {
+    const expectedDataUrl = `data:${f.mime};base64,${f.base64}`;
+
+    describe(`${f.label} across source kinds`, () => {
+      it('accepts from a data URL with the detected MIME type', async () => {
+        const image = await loadImage(f.dataUrl, 5);
+        expect(image.mimeType).toBe(f.mime);
+        expect(image.dataUrl).toBe(expectedDataUrl);
+      });
+
+      it('accepts from a local file with the detected MIME type', async () => {
+        const file = writeTempFile(f.bytes, f.filename);
+        try {
+          const image = await loadImage(file.path, 5);
+          expect(image.mimeType).toBe(f.mime);
+          expect(image.dataUrl).toBe(expectedDataUrl);
+        } finally {
+          file.cleanup();
+        }
+      });
+
+      it('accepts from an HTTP URL with the detected MIME type', async () => {
+        const image = await loadImage(`${server.url}${f.route}`, 5);
+        expect(image.mimeType).toBe(f.mime);
+        expect(image.dataUrl).toBe(expectedDataUrl);
+      });
+    });
+  }
+});
+
+describe('loadImage size override uniformity across source kinds', () => {
+  let server: MockImageServer;
+  beforeEach(async () => {
+    server = await startMockImageServer();
+    server.setRoute('/png', { status: 200, body: Buffer.from(TINY_PNG_BYTES) });
+  });
+  afterEach(async () => {
+    await server.close();
+  });
+
+  it('applies the same positive override to data URL, file, and HTTP sources', async () => {
+    const file = writeTempFile(TINY_PNG_BYTES);
+    try {
+      // 1e-6 MB floors to ~1 byte; the tiny PNG decodes to ~67 bytes and
+      // exceeds it. Every source kind must reject with the same error.
+      await expect(loadImage(TINY_PNG_DATA_URL, 1e-6)).rejects.toThrow(/size limit/);
+      await expect(loadImage(file.path, 1e-6)).rejects.toThrow(/size limit/);
+      await expect(loadImage(`${server.url}/png`, 1e-6)).rejects.toThrow(/size limit/);
+    } finally {
+      file.cleanup();
     }
   });
 });

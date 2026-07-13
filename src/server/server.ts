@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import type { ServerConfig } from '../config/index.js';
-import { registerTools } from './tools.js';
+import { registerTools } from './tools/index.js';
 
 // Not exported: referenced only as the return type of `createServer` within
 // this module, so exporting it would trip Knip. Consumers use the value

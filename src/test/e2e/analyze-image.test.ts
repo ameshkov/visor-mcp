@@ -12,11 +12,12 @@ import {
   startMockImageServer,
   type MockImageServer,
   TINY_PNG_DATA_URL,
+  TINY_PNG_BASE64,
   TINY_PNG_BYTES,
   writeTempFile,
   createTempDir,
 } from '../utils/index.js';
-import { getSystemPrompt } from '../../services/index.js';
+import { ANALYZE_IMAGE_PROMPT } from '../../server/tools/analyze-image.js';
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
@@ -75,7 +76,7 @@ describe('analyze_image over stdio', () => {
     expect(body.stream).toBe(false);
     const messages = body.messages as Array<Record<string, unknown>>;
     expect(messages[0].role).toBe('system');
-    expect(messages[0].content).toBe(getSystemPrompt('analyze_image'));
+    expect(messages[0].content).toBe(ANALYZE_IMAGE_PROMPT);
     expect(messages[1].role).toBe('user');
     const content = messages[1].content as Array<Record<string, unknown>>;
     expect(content[0].type).toBe('image_url');
@@ -242,6 +243,26 @@ describe('analyze_image over stdio', () => {
     const result = call.result as { isError?: boolean; content: Array<{ text: string }> };
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toMatch(/^Error:/);
+    expect(mock!.requests).toHaveLength(0);
+  }, 20000);
+
+  it('rejects a data URL with a declared MIME mismatch without calling the provider', async () => {
+    mock = await startMockProvider();
+    child = spawnServer(envFor(mock.url));
+    const read = lineReader(child.stdout!);
+    await init(child, read);
+
+    const call = await request(child, read, 'tools/call', {
+      name: 'analyze_image',
+      arguments: {
+        image_source: `data:image/jpeg;base64,${TINY_PNG_BASE64}`,
+        prompt: 'describe this image',
+      },
+    });
+    const result = call.result as { isError?: boolean; content: Array<{ text: string }> };
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toMatch(/^Error:/);
+    expect(result.content[0].text).toMatch(/declared format/);
     expect(mock!.requests).toHaveLength(0);
   }, 20000);
 });

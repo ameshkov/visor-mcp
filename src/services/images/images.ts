@@ -2,6 +2,12 @@ import { Buffer } from 'node:buffer';
 import { open, type FileHandle } from 'node:fs/promises';
 import type { Stats } from 'node:fs';
 import { isAbsolute } from 'node:path';
+import {
+  assertDeclaredImageMimeMatches,
+  contentTypeToImageMime,
+  detectFormat,
+  extensionToImageMime,
+} from './format.js';
 
 export interface ValidatedImage {
   readonly mimeType: string;
@@ -11,12 +17,11 @@ export interface ValidatedImage {
 
 const DATA_URL_RE = /^data:([^;,]*)?(;base64)?,(.*)$/;
 const STRICT_BASE64_RE = /^[A-Za-z0-9+/]+={0,2}$/;
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const READ_CHUNK_SIZE = 65_536;
 const MAX_REDIRECTS = 5;
 
 type ImageSource =
-  | { readonly kind: 'dataUrl'; readonly data: string }
+  | { readonly kind: 'dataUrl'; readonly data: string; readonly declaredMime: string | undefined }
   | { readonly kind: 'httpUrl'; readonly url: string }
   | { readonly kind: 'filePath'; readonly path: string };
 
@@ -25,7 +30,7 @@ export async function loadImage(source: string, maxImageSizeMb: number): Promise
   const classified = classifySource(source);
   switch (classified.kind) {
     case 'dataUrl':
-      return loadDataUrlImage(classified.data, maxBytes);
+      return loadDataUrlImage(classified.data, classified.declaredMime, maxBytes);
     case 'httpUrl':
       return loadHttpImage(classified.url, maxBytes);
     case 'filePath':
@@ -43,7 +48,7 @@ function classifySource(source: string): ImageSource {
     if (!STRICT_BASE64_RE.test(data) || data.length % 4 !== 0) {
       throw new Error('image source has malformed base64');
     }
-    return { kind: 'dataUrl', data };
+    return { kind: 'dataUrl', data, declaredMime: match[1] };
   }
   let parsed: URL | undefined;
   try {
@@ -63,7 +68,11 @@ function classifySource(source: string): ImageSource {
   throw new Error('image source must be an absolute file path, HTTP/HTTPS URL, or base64 data URL');
 }
 
-function loadDataUrlImage(data: string, maxBytes: number): ValidatedImage {
+function loadDataUrlImage(
+  data: string,
+  declaredMime: string | undefined,
+  maxBytes: number,
+): ValidatedImage {
   if (decodedByteLength(data) > maxBytes) {
     throw new Error('image exceeds the configured size limit');
   }
@@ -72,6 +81,7 @@ function loadDataUrlImage(data: string, maxBytes: number): ValidatedImage {
   if (mimeType === null) {
     throw new Error('image is not a supported format');
   }
+  assertDeclaredImageMimeMatches(declaredMime, mimeType);
   return { mimeType, bytes, dataUrl: `data:${mimeType};base64,${data}` };
 }
 
@@ -88,6 +98,7 @@ async function loadFileImage(path: string, maxBytes: number): Promise<ValidatedI
     if (mimeType === null) {
       throw new Error('image is not a supported format');
     }
+    assertDeclaredImageMimeMatches(extensionToImageMime(path), mimeType);
     return { mimeType, bytes, dataUrl: `data:${mimeType};base64,${bytes.toString('base64')}` };
   } finally {
     await handle?.close();
@@ -123,6 +134,10 @@ async function loadHttpImage(rawUrl: string, maxBytes: number): Promise<Validate
     if (mimeType === null) {
       throw new Error('image is not a supported format');
     }
+    assertDeclaredImageMimeMatches(
+      contentTypeToImageMime(response.headers.get('content-type')),
+      mimeType,
+    );
     return { mimeType, bytes, dataUrl: `data:${mimeType};base64,${bytes.toString('base64')}` };
   }
 }
@@ -256,11 +271,4 @@ function decodedByteLength(base64: string): number {
   if (len === 0) return 0;
   const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
   return (len * 3) / 4 - padding;
-}
-
-function detectFormat(bytes: Uint8Array): string | null {
-  if (bytes.length >= 8 && Buffer.from(bytes.subarray(0, 8)).equals(PNG_SIGNATURE)) {
-    return 'image/png';
-  }
-  return null;
 }

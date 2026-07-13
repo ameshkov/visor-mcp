@@ -2,8 +2,10 @@
 
 Vision MCP is an MCP server that provides vision capabilities to
 text-only models through OpenAI-compatible providers. It exposes seven
-tools for image analysis, with `analyze_image` fully implemented and six
-specialized tools reserved for future work.
+tools for image analysis, with `analyze_image`, `ui_to_artifact`,
+`extract_text_from_screenshot`, `diagnose_error_screenshot`,
+`understand_technical_diagram`, and `analyze_data_visualization` fully
+implemented and one specialized tool reserved for future work.
 
 ## Table of Contents
 
@@ -49,9 +51,9 @@ vision-mcp/
 │   ├── index.ts          # Entry point: load config, create server, start stdio
 │   ├── config/           # Config loading + error formatting
 │   ├── server/           # MCP server creation + tool handlers
-│   ├── services/         # Provider, images, prompts — each its own directory
+│   │   └── tools/        # One file per tool + shared handler code
+│   ├── services/         # Provider + images — each its own directory
 │   │   ├── images/       # Image loading and validation
-│   │   ├── prompts/      # System prompts for LLM tools
 │   │   └── provider/     # OpenAI-compatible provider API integration
 │   └── test/             # Test infrastructure colocated with source
 │       ├── e2e/          # End-to-end tests over stdio
@@ -169,12 +171,13 @@ The layers, from top to bottom:
   registers tool handlers, and wires the `StdioServerTransport`.
   Tool handlers define Zod schemas and delegate to services; no
   business logic beyond orchestration.
-- **Services** (`src/services/`) — vision provider calls, image loading,
-  and system prompts. Each service is its own subdirectory
-  (`provider/`, `images/`, `prompts/`) with a barrel `index.ts` that
-  encapsulates all its functionality; the top-level `services/index.ts`
-  aggregates them into one public API. Provider-specific logic lives
-  here so it can be tested independently of MCP transport concerns.
+- **Services** (`src/services/`) — vision provider calls and image loading.
+  Each service is its own subdirectory (`provider/`, `images/`) with a
+  barrel `index.ts` that encapsulates all its functionality; the
+  top-level `services/index.ts` aggregates them into one public API.
+  Provider-specific logic lives here so it can be tested independently of
+  MCP transport concerns. System prompts are co-located with their tool
+  definitions under `src/server/tools/`, not in a separate service.
 - **Config** (`src/config/`) — infrastructure: configuration loading
   from environment variables and a `.env` file, plus error formatting
   and startup diagnostics.
@@ -193,6 +196,12 @@ Tool handlers MUST NOT receive transport clients, raw server
 connections, or provider HTTP clients. These are implementation
 details wired inside the modules they belong to.
 
+Each tool's system prompt is declared in the same file as the tool
+definition (or in a sibling `*-prompts.ts` when a tool has multiple
+prompts). System prompts MUST NOT live in a separate service or be
+fetched indirectly via a lookup function — the prompt constant travels
+with the tool that consumes it.
+
 ### Code Quality
 
 All code MUST meet documentation and style requirements before merge:
@@ -201,6 +210,14 @@ All code MUST meet documentation and style requirements before merge:
   and their properties MUST have JSDoc comments describing purpose,
   arguments, return values, and thrown errors (use `@throws` only for
   specific errors).
+- **Tool schema documentation**: Every MCP tool parameter schema MUST
+  attach a `.describe(...)` to each field so clients receive per-parameter
+  guidance through the `tools/list` input schema; string parameters use
+  the `nonWhitespaceField(description)` factory. Tool-level
+  `description` strings use a structured form with `Use this tool ONLY
+  when …` and `Do NOT use for: …` sections, mirroring the reference
+  `@z_ai/mcp-server`. Tool argument schemas MUST NOT call `.strict()`:
+  unknown keys are stripped (accepted), not rejected.
 - **Static analysis gates**: Every change MUST pass TypeScript
   compilation (`pnpm typecheck`), ESLint (`pnpm lint`), and
   Prettier/Markdownlint (`pnpm format:check`) before merge.

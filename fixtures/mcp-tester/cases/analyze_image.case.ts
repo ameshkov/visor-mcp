@@ -1,4 +1,4 @@
-import { expectError, expectHandlerError, expectKeyword, pngDataUrl } from '../src/fixtures.js';
+import { expectHandlerError, expectKeyword, pngDataUrl } from '../src/fixtures.js';
 import type { ToolFixture } from '../src/types.js';
 
 /**
@@ -21,16 +21,16 @@ export default {
       },
     },
     {
-      name: 'rejects an unknown argument',
+      name: 'ignores an unknown argument',
       description:
-        'The schema is strict, so an unexpected field must be rejected before the handler runs.',
+        'Unknown fields are stripped rather than rejected at schema validation, so the handler runs. With a non-image source in a non-live run, the call fails at the image loader with a sanitized handler error (an `Error:` prefix, not an SDK validation message), proving the extra field was accepted past validation.',
       arguments: {
-        image_source: pngDataUrl('smiley.png'),
+        image_source: 'not a source',
         prompt: 'x',
         unknown_field: 1,
       },
       assert({ result }) {
-        expectError(result);
+        expectHandlerError(result);
       },
     },
     {

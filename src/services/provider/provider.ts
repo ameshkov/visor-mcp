@@ -53,13 +53,13 @@ function composeRequestBody(
     image_url: { url: image.dataUrl },
   }));
   return {
+    ...config.requestBodyExtras,
     model: config.model,
     messages: [
       { role: 'system', content: request.systemPrompt },
       { role: 'user', content: [...imageParts, { type: 'text', text: request.userText }] },
     ],
     stream: false,
-    ...config.requestBodyExtras,
   };
 }
 

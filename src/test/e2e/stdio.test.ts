@@ -20,25 +20,41 @@ describe('stdio discovery', () => {
     expect(names).toHaveLength(7);
     expect(names).not.toContain('analyze_video');
     expect(names).toEqual([
+      'ui_diff_check',
       'ui_to_artifact',
       'extract_text_from_screenshot',
       'diagnose_error_screenshot',
       'understand_technical_diagram',
-      'analyze_data_visualization',
-      'ui_diff_check',
       'analyze_image',
+      'analyze_data_visualization',
     ]);
 
     const artifact = tools.find((t) => t.name === 'ui_to_artifact') as Record<string, unknown>;
     const inputSchema = artifact.inputSchema as Record<string, unknown>;
     expect(artifact.description).toBe(
-      'Convert a UI screenshot into frontend code, an AI recreation prompt, a design specification, or a natural-language description. Use it for UI design conversion, not OCR, error diagnosis, technical diagrams, or charts.',
+      `Convert a UI screenshot into frontend code, an AI recreation prompt, a design specification, or a natural-language description, selected via output_type.
+
+Use this tool ONLY when the user wants to:
+- Generate frontend code from a UI design (output_type='code')
+- Create an AI prompt that recreates the UI (output_type='prompt')
+- Extract a design specification document (output_type='spec')
+- Get a natural-language description of the UI (output_type='description')
+
+Do NOT use for: OCR/text extraction, error diagnosis, technical diagrams, or data visualizations.`,
     );
     expect(inputSchema.type).toBe('object');
     expect(inputSchema.additionalProperties).toBe(false);
-    expect(
-      (inputSchema.properties as Record<string, Record<string, unknown>>).output_type.enum,
-    ).toEqual(['code', 'prompt', 'spec', 'description']);
+    const props = inputSchema.properties as Record<string, Record<string, unknown>>;
+    for (const field of ['image_source', 'output_type', 'prompt']) {
+      expect(typeof props[field].description).toBe('string');
+      expect((props[field].description as string).length).toBeGreaterThan(0);
+    }
+    expect((props.output_type as Record<string, unknown>).enum).toEqual([
+      'code',
+      'prompt',
+      'spec',
+      'description',
+    ]);
     expect(inputSchema.required).toEqual(
       expect.arrayContaining(['image_source', 'output_type', 'prompt']),
     );
@@ -62,7 +78,7 @@ describe('stdio discovery', () => {
     await kill(child);
   }, 20000);
 
-  it('rejects invalid tool input before reaching the handler', async () => {
+  it('strips unknown fields and rejects an invalid image source at the handler', async () => {
     const child = spawnServer(validEnv);
     const read = lineReader(child.stdout!);
     await init(child, read);
@@ -71,9 +87,12 @@ describe('stdio discovery', () => {
       name: 'analyze_image',
       arguments: { image_source: 'x', prompt: 'y', unknown_field: 1 },
     });
-    // MCP SDK returns validation failures as error results, not JSON-RPC errors.
+    // Unknown fields are stripped rather than rejected at validation, so the
+    // handler runs and rejects the relative image source itself; the result
+    // is a handler error (`Error:` prefix), not an SDK validation rejection.
     const result = call.result as { isError?: boolean; content: Array<{ text: string }> };
     expect(result.isError).toBe(true);
+    expect(result.content[0].text).toMatch(/^Error:/);
 
     await kill(child);
   }, 20000);
