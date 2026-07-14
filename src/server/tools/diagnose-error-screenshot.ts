@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 
 const diagnoseErrorSchema = z.object({
   image_source: nonWhitespaceField(
@@ -55,14 +60,19 @@ Organize the response as:
 type DiagnoseErrorArgs = z.infer<typeof diagnoseErrorSchema>;
 
 function diagnoseErrorHandler(config: ServerConfig) {
-  return async (args: DiagnoseErrorArgs): Promise<CallToolResult> => {
+  return async (args: DiagnoseErrorArgs, extra: ToolHandlerExtra): Promise<CallToolResult> => {
     const userText = args.context
       ? `${args.prompt}\n\n<error_context>This error occurred ${args.context}.</error_context>`
       : args.prompt;
-    return runImageAnalysis(config, args.image_source, {
-      systemPrompt: DIAGNOSE_ERROR_SCREENSHOT_PROMPT,
-      userText,
-    });
+    return runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: DIAGNOSE_ERROR_SCREENSHOT_PROMPT,
+        userText,
+      },
+      extra.signal,
+    );
   };
 }
 

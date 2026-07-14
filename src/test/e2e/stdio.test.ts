@@ -63,6 +63,12 @@ Do NOT use for: OCR/text extraction, error diagnosis, technical diagrams, or dat
   }, 20000);
 
   it('returns an error for a non-data-URL image source', async () => {
+    // `example.test` fails DNS resolution (ENOTFOUND), which under the
+    // retry policy is a retriable connection failure: 3 attempts + a real
+    // 1 s + 2 s backoff ≈ 3 s before `Error: image download failed`
+    // surfaces. The spawned server runs its own event loop, so fake timers
+    // cannot reach it. The regression is bounded and acceptable; the 20 s
+    // per-test timeout covers it.
     const child = spawnServer(validEnv);
     const read = lineReader(child.stdout!);
     await init(child, read);

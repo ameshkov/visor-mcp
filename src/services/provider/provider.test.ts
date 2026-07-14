@@ -96,13 +96,9 @@ describe('analyze response normalization', () => {
   });
 
   it('returns an error for a non-2xx response', async () => {
-    mock = await startMockProvider({ status: 500, body: { error: 'boom' } });
+    // 400 is a permanent failure — not retried.
+    mock = await startMockProvider({ status: 400, body: { error: 'boom' } });
     const result = await analyze(configFor(mock.url), REQUEST);
-    expect(result.ok).toBe(false);
-  });
-
-  it('returns an error when the provider is unreachable', async () => {
-    const result = await analyze(configFor('http://127.0.0.1:1'), REQUEST);
     expect(result.ok).toBe(false);
   });
 });
@@ -320,17 +316,22 @@ describe('analyze response normalization variants', () => {
 
 describe('analyze error containment', () => {
   it('does not leak a 5xx response body into the error string', async () => {
-    mock = await startMockProvider({
-      status: 502,
-      body: { error: 'leak: api_key=sk-1234567890abcdef' },
-    });
+    mock = await startMockProvider();
+    // 502 is a retriable 5xx — 3 total attempts with real 1s+2s backoff.
+    // Set up a sequence so every attempt returns the same leaking body.
+    mock.setResponseSequence([
+      { status: 502, body: { error: 'leak: api_key=sk-1234567890abcdef' } },
+      { status: 502, body: { error: 'leak: api_key=sk-1234567890abcdef' } },
+      { status: 502, body: { error: 'leak: api_key=sk-1234567890abcdef' } },
+    ]);
     const result = await analyze(configFor(mock.url), REQUEST);
     expect(result.ok).toBe(false);
+    expect(mock.requests).toHaveLength(3);
     if (!result.ok) {
       expect(result.error).toBe('provider request failed');
       expect(result.error).not.toMatch(/sk-|api_key|leak/i);
     }
-  });
+  }, 10_000);
 
   it('does not leak a refusal body into the malformed-response error string', async () => {
     mock = await startMockProvider({
@@ -379,11 +380,10 @@ describe('analyze error containment', () => {
 });
 
 describe('analyze non-retry behavior', () => {
-  // No retry mechanism exists in this issue's slice (PRD User Story 8 work on
-  // transient-failure retries, timeouts, and cancellation is out of scope).
-  // These tests document the contract this issue guarantees: a malformed first
-  // choice is final — the provider is called at most once — and the call
-  // returns a sanitized result without retrying.
+  // The retry mechanism exists (see provider-retry.test.ts), but permanent
+  // failures like malformed responses, 4xx (non-429/408), and 2xx non-JSON
+  // bodies must still return after exactly ONE attempt. These tests verify
+  // the non-retry contract for permanent failures.
 
   it('calls the provider exactly once for a malformed-response body', async () => {
     mock = await startMockProvider({
@@ -395,7 +395,8 @@ describe('analyze non-retry behavior', () => {
   });
 
   it('calls the provider exactly once for a non-2xx response', async () => {
-    mock = await startMockProvider({ status: 500, body: { error: 'boom' } });
+    // 400 is a permanent failure — not retried.
+    mock = await startMockProvider({ status: 400, body: { error: 'boom' } });
     const result = await analyze(configFor(mock.url), REQUEST);
     expect(result.ok).toBe(false);
     expect(mock.requests).toHaveLength(1);

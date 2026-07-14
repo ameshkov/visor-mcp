@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 
 const analyzeVisualizationSchema = z.object({
   image_source: nonWhitespaceField(
@@ -57,14 +62,22 @@ Organize the response as:
 type AnalyzeVisualizationArgs = z.infer<typeof analyzeVisualizationSchema>;
 
 function analyzeVisualizationHandler(config: ServerConfig) {
-  return async (args: AnalyzeVisualizationArgs): Promise<CallToolResult> => {
+  return async (
+    args: AnalyzeVisualizationArgs,
+    extra: ToolHandlerExtra,
+  ): Promise<CallToolResult> => {
     const userText = args.analysis_focus
       ? `${args.prompt}\n\n<analysis_focus>Focus particularly on: ${args.analysis_focus}.</analysis_focus>`
       : args.prompt;
-    return runImageAnalysis(config, args.image_source, {
-      systemPrompt: ANALYZE_DATA_VISUALIZATION_PROMPT,
-      userText,
-    });
+    return runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: ANALYZE_DATA_VISUALIZATION_PROMPT,
+        userText,
+      },
+      extra.signal,
+    );
   };
 }
 

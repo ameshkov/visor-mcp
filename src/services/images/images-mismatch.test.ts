@@ -16,14 +16,14 @@ describe('loadImage data URL declared MIME mismatch', () => {
   it('rejects a data URL whose declared MIME conflicts with its bytes', async () => {
     // Declare image/jpeg but carry PNG bytes — conflict.
     const pngDeclaredAsJpeg = `data:image/jpeg;base64,${TINY_PNG_BASE64}`;
-    await expect(loadImage(pngDeclaredAsJpeg, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(pngDeclaredAsJpeg, 5, 60_000)).rejects.toThrow(/declared format/);
   });
 
   it('still rejects an SVG data URL as unsupported before checking the declared MIME', async () => {
     // image/svg+xml is not a supported format; detectFormat returns null and
     // the existing unsupported-format path fires before any mismatch check.
     const svg = Buffer.from('<svg></svg>').toString('base64');
-    await expect(loadImage(`data:image/svg+xml;base64,${svg}`, 5)).rejects.toThrow(
+    await expect(loadImage(`data:image/svg+xml;base64,${svg}`, 5, 60_000)).rejects.toThrow(
       /supported format/,
     );
   });
@@ -31,7 +31,7 @@ describe('loadImage data URL declared MIME mismatch', () => {
   it('accepts a data URL with no declared MIME based on its bytes only', async () => {
     // data:;base64,<png> — declared MIME is empty, so trust bytes only.
     const pngNoMime = `data:;base64,${TINY_PNG_BASE64}`;
-    const image = await loadImage(pngNoMime, 5);
+    const image = await loadImage(pngNoMime, 5, 60_000);
     expect(image.mimeType).toBe('image/png');
     expect(image.dataUrl).toBe(`data:image/png;base64,${TINY_PNG_BASE64}`);
   });
@@ -40,7 +40,7 @@ describe('loadImage data URL declared MIME mismatch', () => {
     // image/jpg is not in the canonical set; the check is skipped and bytes
     // remain authoritative.
     const pngNonCanonical = `data:image/jpg;base64,${TINY_PNG_BASE64}`;
-    const image = await loadImage(pngNonCanonical, 5);
+    const image = await loadImage(pngNonCanonical, 5, 60_000);
     expect(image.mimeType).toBe('image/png');
   });
 });
@@ -51,7 +51,7 @@ describe('loadImage local file extension mismatch', () => {
     // bytes are PNG.
     const file = writeTempFile(TINY_PNG_BYTES, 'image.jpg');
     try {
-      await expect(loadImage(file.path, 5)).rejects.toThrow(/declared format/);
+      await expect(loadImage(file.path, 5, 60_000)).rejects.toThrow(/declared format/);
     } finally {
       file.cleanup();
     }
@@ -60,7 +60,7 @@ describe('loadImage local file extension mismatch', () => {
   it('accepts a file with a matching extension and bytes', async () => {
     const file = writeTempFile(TINY_PNG_BYTES, 'image.png');
     try {
-      const image = await loadImage(file.path, 5);
+      const image = await loadImage(file.path, 5, 60_000);
       expect(image.mimeType).toBe('image/png');
       expect(image.dataUrl).toBe(`data:image/png;base64,${TINY_PNG_BASE64}`);
     } finally {
@@ -72,7 +72,7 @@ describe('loadImage local file extension mismatch', () => {
     // image.dat — extension not in the map, so no declared MIME; trust bytes.
     const file = writeTempFile(TINY_PNG_BYTES, 'image.dat');
     try {
-      const image = await loadImage(file.path, 5);
+      const image = await loadImage(file.path, 5, 60_000);
       expect(image.mimeType).toBe('image/png');
     } finally {
       file.cleanup();
@@ -95,7 +95,7 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/jpeg' },
       body: Buffer.from(TINY_PNG_BYTES),
     });
-    await expect(loadImage(`${server.url}/png`, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(`${server.url}/png`, 5, 60_000)).rejects.toThrow(/declared format/);
   });
 
   it('accepts a response with a matching Content-Type', async () => {
@@ -104,13 +104,13 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/png' },
       body: Buffer.from(TINY_PNG_BYTES),
     });
-    const image = await loadImage(`${server.url}/png`, 5);
+    const image = await loadImage(`${server.url}/png`, 5, 60_000);
     expect(image.mimeType).toBe('image/png');
   });
 
   it('accepts a response with no Content-Type based on its bytes only', async () => {
     server.setRoute('/png', { status: 200, body: Buffer.from(TINY_PNG_BYTES) });
-    const image = await loadImage(`${server.url}/png`, 5);
+    const image = await loadImage(`${server.url}/png`, 5, 60_000);
     expect(image.mimeType).toBe('image/png');
   });
 
@@ -120,7 +120,7 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'application/octet-stream' },
       body: Buffer.from(TINY_PNG_BYTES),
     });
-    const image = await loadImage(`${server.url}/png`, 5);
+    const image = await loadImage(`${server.url}/png`, 5, 60_000);
     expect(image.mimeType).toBe('image/png');
   });
 
@@ -130,7 +130,7 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/png' },
       body: Buffer.from(TINY_JPEG_BYTES),
     });
-    await expect(loadImage(`${server.url}/jpeg`, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(`${server.url}/jpeg`, 5, 60_000)).rejects.toThrow(/declared format/);
   });
 
   it('rejects WebP bytes served with an image/png Content-Type', async () => {
@@ -139,7 +139,7 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/png' },
       body: Buffer.from(TINY_WEBP_BYTES),
     });
-    await expect(loadImage(`${server.url}/webp`, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(`${server.url}/webp`, 5, 60_000)).rejects.toThrow(/declared format/);
   });
 
   it('rejects GIF bytes served with an image/png Content-Type', async () => {
@@ -148,7 +148,7 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/png' },
       body: Buffer.from(TINY_GIF_BYTES),
     });
-    await expect(loadImage(`${server.url}/gif`, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(`${server.url}/gif`, 5, 60_000)).rejects.toThrow(/declared format/);
   });
 
   it('rejects after a redirect chain when the final Content-Type conflicts with bytes', async () => {
@@ -163,6 +163,8 @@ describe('loadImage http content-type mismatch', () => {
       headers: { 'content-type': 'image/jpeg' },
       body: Buffer.from(TINY_PNG_BYTES),
     });
-    await expect(loadImage(`${server.url}/redir-start`, 5)).rejects.toThrow(/declared format/);
+    await expect(loadImage(`${server.url}/redir-start`, 5, 60_000)).rejects.toThrow(
+      /declared format/,
+    );
   });
 });

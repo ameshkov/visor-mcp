@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 
 const understandDiagramSchema = z.object({
   image_source: nonWhitespaceField(
@@ -53,14 +58,19 @@ Organize the response as:
 type UnderstandDiagramArgs = z.infer<typeof understandDiagramSchema>;
 
 function understandDiagramHandler(config: ServerConfig) {
-  return async (args: UnderstandDiagramArgs): Promise<CallToolResult> => {
+  return async (args: UnderstandDiagramArgs, extra: ToolHandlerExtra): Promise<CallToolResult> => {
     const userText = args.diagram_type
       ? `${args.prompt}\n\n<diagram_type_hint>This is a ${args.diagram_type} diagram.</diagram_type_hint>`
       : args.prompt;
-    return runImageAnalysis(config, args.image_source, {
-      systemPrompt: UNDERSTAND_TECHNICAL_DIAGRAM_PROMPT,
-      userText,
-    });
+    return runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: UNDERSTAND_TECHNICAL_DIAGRAM_PROMPT,
+        userText,
+      },
+      extra.signal,
+    );
   };
 }
 

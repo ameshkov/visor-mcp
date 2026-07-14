@@ -5,4 +5,4 @@
  */
 export { loadConfig } from './config.js';
 export type { ServerConfig } from './config.js';
-export { formatStartupDiagnostic, errorToolResult, notImplementedToolResult } from './errors.js';
+export { formatStartupDiagnostic, errorToolResult } from './errors.js';

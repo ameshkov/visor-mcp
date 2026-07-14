@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 
 const extractTextSchema = z.object({
   image_source: nonWhitespaceField(
@@ -58,14 +63,19 @@ allows it.
 type ExtractTextArgs = z.infer<typeof extractTextSchema>;
 
 function extractTextHandler(config: ServerConfig) {
-  return async (args: ExtractTextArgs): Promise<CallToolResult> => {
+  return async (args: ExtractTextArgs, extra: ToolHandlerExtra): Promise<CallToolResult> => {
     const userText = args.programming_language
       ? `${args.prompt}\n\n<language_hint>The code is in ${args.programming_language}.</language_hint>`
       : args.prompt;
-    return runImageAnalysis(config, args.image_source, {
-      systemPrompt: EXTRACT_TEXT_FROM_SCREENSHOT_PROMPT,
-      userText,
-    });
+    return runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: EXTRACT_TEXT_FROM_SCREENSHOT_PROMPT,
+        userText,
+      },
+      extra.signal,
+    );
   };
 }
 

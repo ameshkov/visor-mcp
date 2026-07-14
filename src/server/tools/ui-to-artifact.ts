@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, outputTypeEnum, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  outputTypeEnum,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 import { getUiToArtifactPrompt } from './ui-to-artifact-prompts.js';
 
 const uiToArtifactSchema = z.object({
@@ -29,11 +35,16 @@ Do NOT use for: OCR/text extraction, error diagnosis, technical diagrams, or dat
 type UiToArtifactArgs = z.infer<typeof uiToArtifactSchema>;
 
 function uiToArtifactHandler(config: ServerConfig) {
-  return async (args: UiToArtifactArgs): Promise<CallToolResult> =>
-    runImageAnalysis(config, args.image_source, {
-      systemPrompt: getUiToArtifactPrompt(args.output_type),
-      userText: args.prompt,
-    });
+  return async (args: UiToArtifactArgs, extra: ToolHandlerExtra): Promise<CallToolResult> =>
+    runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: getUiToArtifactPrompt(args.output_type),
+        userText: args.prompt,
+      },
+      extra.signal,
+    );
 }
 
 export const uiToArtifact: Tool = {

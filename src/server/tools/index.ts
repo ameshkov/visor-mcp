@@ -10,8 +10,8 @@ import { uiDiffCheck } from './ui-diff-check.js';
 import { uiToArtifact } from './ui-to-artifact.js';
 
 /**
- * Catalog of every registered tool, in discovery order: the not-yet-
- * implemented `ui_diff_check`, then the specialized tools, then the
+ * Catalog of every registered tool, in discovery order: the visual-
+ * regression `ui_diff_check`, then the specialized tools, then the
  * general-purpose `analyze_image` fallback, with `analyze_data_visualization`
  * last. This order is what `tools/list` advertises to clients.
  */

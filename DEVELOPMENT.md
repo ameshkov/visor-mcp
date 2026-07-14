@@ -3,8 +3,10 @@
 This guide is for developers setting up the `vision-mcp` repository for
 the first time. It covers environment setup, local execution, the
 contribution workflow, and common tasks. For architecture and code
-guidelines, see [AGENTS.md](AGENTS.md); for the project overview, see
-[README.md](README.md).
+guidelines, see [AGENTS.md](AGENTS.md); for the operator guide
+(installation, configuration, tools, data flow, security), see
+[README.md](README.md). `README.md` is operator-facing while
+`DEVELOPMENT.md` is developer-facing.
 
 ## Table of Contents
 
@@ -91,7 +93,7 @@ Optional variables:
 | Variable | Default | Description |
 | --- | --- | --- |
 | `VISION_MCP_MAX_IMAGE_SIZE_MB` | `5` | Maximum accepted image size in MB |
-| `VISION_MCP_REQUEST_TIMEOUT_MS` | `60000` | Provider request timeout in ms |
+| `VISION_MCP_REQUEST_TIMEOUT_MS` | `60000` | Per-attempt timeout in ms applied independently to each provider request and each HTTP image download (not a total-call timeout — each retry attempt gets a fresh timer) |
 | `VISION_MCP_REQUEST_BODY_JSON` | `{}` | Extra JSON merged into the request body (cannot set `model`, `messages`, or `stream`) |
 
 If a required variable is missing or invalid, the server exits with

@@ -126,6 +126,64 @@ describe('tool catalog contracts', () => {
     );
   });
 
+  it('strips unknown fields for ui_diff_check (open schema)', () => {
+    const schema = schemaOf('ui_diff_check');
+    const result = schema.safeParse({
+      expected_image_source: 'x',
+      actual_image_source: 'y',
+      prompt: 'z',
+      surprise: 1,
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data).not.toHaveProperty('surprise');
+    expect(result.data).toMatchObject({
+      expected_image_source: 'x',
+      actual_image_source: 'y',
+      prompt: 'z',
+    });
+  });
+
+  it('rejects a whitespace-only prompt for ui_diff_check', () => {
+    const schema = schemaOf('ui_diff_check');
+    expect(
+      schema.safeParse({
+        expected_image_source: 'x',
+        actual_image_source: 'y',
+        prompt: '   ',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects whitespace-only image sources for ui_diff_check', () => {
+    const schema = schemaOf('ui_diff_check');
+    expect(
+      schema.safeParse({
+        expected_image_source: '   ',
+        actual_image_source: 'y',
+        prompt: 'z',
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        expected_image_source: 'x',
+        actual_image_source: '   ',
+        prompt: 'z',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts valid ui_diff_check input', () => {
+    const schema = schemaOf('ui_diff_check');
+    expect(
+      schema.safeParse({
+        expected_image_source: 'x',
+        actual_image_source: 'y',
+        prompt: 'z',
+      }).success,
+    ).toBe(true);
+  });
+
   it('analyze_image requires only image_source and prompt', () => {
     const schema = schemaOf('analyze_image');
     expect(fields(schema)).toEqual(expect.arrayContaining(['image_source', 'prompt']));

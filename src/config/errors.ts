@@ -22,17 +22,6 @@ export function formatStartupDiagnostic(error: unknown): string {
 }
 
 /**
- * Sanitized not-yet-implemented tool result. Begins with "Error:" and discloses
- * no configured or request-sensitive data.
- */
-export function notImplementedToolResult(toolName: string): CallToolResult {
-  return {
-    content: [{ type: 'text' as const, text: `Error: ${toolName} is not yet implemented.` }],
-    isError: true,
-  };
-}
-
-/**
  * Sanitized tool error result. `message` must be a curated, non-sensitive
  * string produced by this package; it is prefixed with `Error:` (without
  * double-prefixing) and the result is marked `isError: true`.

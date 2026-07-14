@@ -2,10 +2,10 @@
 
 Vision MCP is an MCP server that provides vision capabilities to
 text-only models through OpenAI-compatible providers. It exposes seven
-tools for image analysis, with `analyze_image`, `ui_to_artifact`,
-`extract_text_from_screenshot`, `diagnose_error_screenshot`,
-`understand_technical_diagram`, and `analyze_data_visualization` fully
-implemented and one specialized tool reserved for future work.
+tools for image analysis, all fully implemented: `analyze_image`,
+`ui_to_artifact`, `extract_text_from_screenshot`,
+`diagnose_error_screenshot`, `understand_technical_diagram`,
+`analyze_data_visualization`, and `ui_diff_check`.
 
 ## Table of Contents
 
@@ -54,10 +54,21 @@ vision-mcp/
 │   │   └── tools/        # One file per tool + shared handler code
 │   ├── services/         # Provider + images — each its own directory
 │   │   ├── images/       # Image loading and validation
+│   │   │   └── http-image.ts # HTTP image download path with retry + timeout
 │   │   └── provider/     # OpenAI-compatible provider API integration
+│   ├── utils/            # Shared helpers consumed across layers
+│   │   ├── retry.ts      # Retry + per-attempt timeout driver
+│   │   └── index.ts      # Barrel exports for the utils module
 │   └── test/             # Test infrastructure colocated with source
+│       ├── docs/          # Documentation-check tests
+│       │   └── readme-topics.test.ts  # Asserts README covers all required operator topics
 │       ├── e2e/          # End-to-end tests over stdio
 │       ├── utils/        # Shared test helpers (mock servers, fixtures)
+│       │   ├── image-fixtures.ts  # Tiny PNG/JPEG/WebP/GIF bytes + baseEnv
+│       │   ├── mock-image-server.ts # MockImageServer + sequence/delay/hang
+│       │   ├── mock-provider.ts  # MockProvider + sequence/delay/hang
+│       │   ├── stdio-rpc.ts   # spawnServer + lineReader + request + init
+│       │   └── temp-files.ts   # createTempDir + writeTempFile
 │       └── setup.ts      # Shared test setup run by Vitest
 ├── fixtures/mcp-tester/  # Standalone E2E fixture runner (own pnpm project)
 ├── .github/workflows/ci.yml   # Quality gate + build
@@ -74,8 +85,9 @@ Each `src/` subdirectory groups related modules behind a barrel
 `index.ts` that defines its public API. Each service under `services/`
 encapsulates all its functionality in its own directory with a barrel;
 the top-level `services/index.ts` aggregates them into one public API.
-Unit tests are colocated with their source (e.g.,
-`src/services/images/images.test.ts` next to
+The `utils/` module holds cross-cutting helpers (e.g., the retry driver)
+shared across services. Unit tests are colocated with their source
+(e.g., `src/services/images/images.test.ts` next to
 `src/services/images/images.ts`). Shared test infrastructure and
 end-to-end tests live under `src/test/`.
 
@@ -144,8 +156,10 @@ Universal design principles this codebase follows:
   has one reason to change.
 - **Dependency Direction** — higher layers may depend on lower layers,
   never the reverse (e.g., `server/` may import `services/` and
-  `config/`; `config/` may not import `server/` or `services/`). See
-  the layer diagram below.
+  `config/`; `config/` may not import `server/` or `services/`).
+  `utils/` is shared infrastructure rather than a layer: any module may
+  import from it, but it MUST NOT import from `services/`, `server/`,
+  or `config/`. See the layer diagram below.
 - **Explicit Boundaries** — module interfaces are intentional; each
   `src/` subdirectory exposes a barrel `index.ts` that defines its
   public API. External code MUST import from barrels only. Do not

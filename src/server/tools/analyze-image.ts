@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ServerConfig } from '../../config/index.js';
-import { runImageAnalysis, nonWhitespaceField, type Tool } from './common.js';
+import {
+  runImageAnalysis,
+  nonWhitespaceField,
+  type Tool,
+  type ToolHandlerExtra,
+} from './common.js';
 
 const analyzeImageSchema = z.object({
   image_source: nonWhitespaceField(
@@ -53,11 +58,16 @@ Do not force sections that do not help answer the user's specific request.
 type AnalyzeImageArgs = z.infer<typeof analyzeImageSchema>;
 
 function analyzeImageHandler(config: ServerConfig) {
-  return async (args: AnalyzeImageArgs): Promise<CallToolResult> =>
-    runImageAnalysis(config, args.image_source, {
-      systemPrompt: ANALYZE_IMAGE_PROMPT,
-      userText: args.prompt,
-    });
+  return async (args: AnalyzeImageArgs, extra: ToolHandlerExtra): Promise<CallToolResult> =>
+    runImageAnalysis(
+      config,
+      args.image_source,
+      {
+        systemPrompt: ANALYZE_IMAGE_PROMPT,
+        userText: args.prompt,
+      },
+      extra.signal,
+    );
 }
 
 export const analyzeImage: Tool = {
