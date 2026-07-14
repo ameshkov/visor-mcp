@@ -1,7 +1,7 @@
 import { loadTesterConfig } from './config.js';
 import { withClient } from './client.js';
 import { loadFixtures, runAll } from './runner.js';
-import { report } from './report.js';
+import { printProgress, printTotals } from './report.js';
 
 /**
  * Entry point. Loads `.env`, spawns the vision-mcp server, discovers its
@@ -24,8 +24,12 @@ async function main(): Promise<void> {
   );
   try {
     const exitCode = await withClient(config, async (client) => {
-      const summaries = await runAll(client, fixtures, { live: config.live });
-      return report(summaries);
+      const startedAt = Date.now();
+      const summaries = await runAll(client, fixtures, {
+        live: config.live,
+        onProgress: printProgress,
+      });
+      return printTotals(summaries, Date.now() - startedAt);
     });
     process.exitCode = exitCode;
   } catch (error) {

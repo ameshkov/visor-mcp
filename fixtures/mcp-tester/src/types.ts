@@ -47,6 +47,21 @@ export interface ToolFixture {
 /** Status of a single case execution. */
 export type CaseStatus = 'passed' | 'failed' | 'skipped';
 
+/**
+ * Event emitted by the runner as fixtures execute, so the entry point can
+ * stream live progress instead of buffering every result until the end. A
+ * `tool` event is emitted before a tool's cases run; a `case` event is
+ * emitted as each case completes (or is skipped).
+ */
+export type ProgressEvent =
+  | {
+      readonly type: 'tool';
+      readonly tool: string;
+      readonly discovered: boolean;
+      readonly caseCount: number;
+    }
+  | { readonly type: 'case'; readonly result: CaseResult };
+
 /** Result of running one case. */
 export interface CaseResult {
   readonly tool: string;
@@ -54,6 +69,8 @@ export interface CaseResult {
   readonly status: CaseStatus;
   /** Present when `status` is `failed` or `skipped`. */
   readonly reason?: string;
+  /** Wall-clock duration of an executed case, in ms. Absent for skipped cases. */
+  readonly durationMs?: number;
 }
 
 /** Aggregate result for one tool across all its cases. */

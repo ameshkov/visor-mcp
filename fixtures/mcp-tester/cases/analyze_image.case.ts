@@ -2,11 +2,12 @@ import { expectHandlerError, expectKeyword, pngDataUrl } from '../src/fixtures.j
 import type { ToolFixture } from '../src/types.js';
 
 /**
- * `analyze_image` is the only tool with a real handler. The non-live cases
- * exercise input validation paths that never reach the provider, so they
- * run without an API key. The live case makes a real provider call and is
- * gated on `MCP_TESTER_LIVE=1`; it verifies the model actually recognized
- * the image content by asserting the response mentions a subject keyword.
+ * `analyze_image` is the general-purpose fallback for image-analysis
+ * requests that do not fit a specialized tool. The non-live cases exercise
+ * input validation paths that never reach the provider, so they run without
+ * an API key. The live case makes a real provider call and is gated on
+ * `MCP_TESTER_LIVE=1`; it verifies the model actually recognized the image
+ * content by asserting the response mentions a subject keyword.
  */
 export default {
   tool: 'analyze_image',

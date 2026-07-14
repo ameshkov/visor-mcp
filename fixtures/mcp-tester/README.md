@@ -124,13 +124,13 @@ breakpoints in `src/`.
 
 `MCP_TESTER_LIVE=1` enables live cases — the ones that make real
 provider calls. This is what makes the config useful for debugging:
-the only case that exercises the real `analyze_image` handler end to end
-is the live case in `cases/analyze_image.case.ts`; the non-live cases
-cover input validation and the "not implemented" stubs. Live mode
-requires valid `VISION_MCP_API_KEY`, `VISION_MCP_BASE_URL`, and
-`VISION_MCP_MODEL` in `.env`, and each run makes a real (billable)
-provider call. Remove the `MCP_TESTER_LIVE` line to debug the
-non-live paths instead.
+every tool has a live case that exercises its real handler end to end by
+sending a sample image and asserting the response mentions a subject
+keyword; the non-live cases cover only input validation, so they run
+without an API key. Live mode requires valid `VISION_MCP_API_KEY`,
+`VISION_MCP_BASE_URL`, and `VISION_MCP_MODEL` in `.env`, and each run
+makes a real (billable) provider call per tool. Remove the
+`MCP_TESTER_LIVE` line to debug the non-live paths instead.
 
 Set a breakpoint in `src/` (for example a tool handler in `src/server/`),
 then press F5. VSCode attaches to both the tester and the spawned server;
@@ -154,24 +154,40 @@ Things to know:
 ## Fixtures
 
 Each tool is paired with one `cases/<tool>.case.ts` file that
-default-exports a `ToolFixture`:
+default-exports a `ToolFixture`. Every fixture follows the same shape: a
+pair of non-live cases that exercise input validation (they never reach
+the provider, so they run without an API key) and a `live: true` case
+that sends a sample image to the real provider and asserts the response
+mentions a subject keyword:
 
 ```ts
-import { expectNotImplemented, pngDataUrl } from '../src/fixtures.js';
+import { expectHandlerError, expectKeyword, pngDataUrl } from '../src/fixtures.js';
 import type { ToolFixture } from '../src/types.js';
 
 export default {
   tool: 'ui_to_artifact',
   cases: [
     {
-      name: 'reports not implemented',
+      name: 'rejects a non-image image source',
       arguments: {
-        image_source: pngDataUrl('ui-form.png'),
+        image_source: 'not a source',
         output_type: 'code',
         prompt: 'convert this UI form to a React component',
       },
-      assert({ result, toolName }) {
-        expectNotImplemented(result, toolName);
+      assert({ result }) {
+        expectHandlerError(result);
+      },
+    },
+    {
+      name: 'describes the login form (live)',
+      live: true,
+      arguments: {
+        image_source: pngDataUrl('ui-form.png'),
+        output_type: 'description',
+        prompt: 'Describe this interface; include the word FORM.',
+      },
+      assert({ result }) {
+        expectKeyword(result, ['form', 'input', 'button', 'login', 'field']);
       },
     },
   ],
@@ -181,8 +197,8 @@ export default {
 ### Images
 
 Each tool is paired with a PNG in `assets/` whose subject is relevant to
-that tool's purpose, so the arguments reflect a realistic call and the
-fixtures are ready for when the handler ships:
+that tool's purpose, so the live cases send a realistic call and the
+keyword assertions can verify the model actually recognized the subject:
 
 - `smiley.png` — `analyze_image` (general analysis).
 - `bar-chart.png` — `analyze_data_visualization`.

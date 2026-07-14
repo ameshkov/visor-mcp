@@ -4,10 +4,20 @@ import { pathToFileURL } from 'node:url';
 import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { CaseResult, ToolCase, ToolFixture, ToolSummary } from './types.js';
+import type { CaseResult, ProgressEvent, ToolCase, ToolFixture, ToolSummary } from './types.js';
 
 /** Suffix identifying a fixture file inside the cases directory. */
 const CASE_SUFFIX = '.case.ts';
+
+/**
+ * Per-call timeout for `tools/call`, in ms. Generous on purpose: the server
+ * retries transient provider failures up to twice (with 1s and 2s backoff)
+ * and each attempt is bounded by its own `VISION_MCP_REQUEST_TIMEOUT_MS`,
+ * so a fully retried call can take well over the MCP SDK's 60s default. This
+ * lets the server's retry policy complete before the client raises
+ * `RequestTimeout`.
+ */
+const CALL_TOOL_TIMEOUT_MS = 180_000;
 
 /**
  * Discover every `*.case.ts` file in `dir` and import its default export as
@@ -60,12 +70,14 @@ function assertFixture(value: unknown, file: string): void {
 /**
  * Discover the server's tools via the MCP client, then run each fixture
  * against its matching tool. Returns one {@link ToolSummary} per fixture,
- * ordered by tool name.
+ * ordered by tool name. When `onProgress` is supplied it is invoked as each
+ * tool begins and as each case finishes, so callers can print live progress
+ * instead of waiting for the full run to complete.
  */
 export async function runAll(
   client: Client,
   fixtures: readonly ToolFixture[],
-  options: { live: boolean },
+  options: { live: boolean; onProgress?: (event: ProgressEvent) => void },
 ): Promise<ToolSummary[]> {
   const list = await client.listTools();
   const known = new Set(list.tools.map((t) => t.name));
@@ -74,9 +86,15 @@ export async function runAll(
   for (const tool of [...fixturesByName.keys()].sort()) {
     const fixture = fixturesByName.get(tool)!;
     const discovered = known.has(tool);
+    options.onProgress?.({
+      type: 'tool',
+      tool,
+      discovered,
+      caseCount: fixture.cases.length,
+    });
     const results = discovered
-      ? await runCases(client, fixture, options.live)
-      : skipAll(fixture, 'tool not advertised by server');
+      ? await runCases(client, fixture, options.live, options.onProgress)
+      : skipAll(fixture, 'tool not advertised by server', options.onProgress);
     summaries.push({ tool, discovered, results });
   }
   return summaries;
@@ -93,23 +111,34 @@ function indexByTool(fixtures: readonly ToolFixture[]): Map<string, ToolFixture>
   return map;
 }
 
-function skipAll(fixture: ToolFixture, reason: string): CaseResult[] {
-  return fixture.cases.map((c) => ({
-    tool: fixture.tool,
-    case: c.name,
-    status: 'skipped',
-    reason,
-  }));
+function skipAll(
+  fixture: ToolFixture,
+  reason: string,
+  onProgress?: (event: ProgressEvent) => void,
+): CaseResult[] {
+  return fixture.cases.map((c) => {
+    const result: CaseResult = {
+      tool: fixture.tool,
+      case: c.name,
+      status: 'skipped',
+      reason,
+    };
+    onProgress?.({ type: 'case', result });
+    return result;
+  });
 }
 
 async function runCases(
   client: Client,
   fixture: ToolFixture,
   live: boolean,
+  onProgress?: (event: ProgressEvent) => void,
 ): Promise<CaseResult[]> {
   const results: CaseResult[] = [];
   for (const c of fixture.cases) {
-    results.push(await runCase(client, fixture.tool, c, live));
+    const result = await runCase(client, fixture.tool, c, live);
+    onProgress?.({ type: 'case', result });
+    results.push(result);
   }
   return results;
 }
@@ -123,24 +152,33 @@ async function runCase(
   if (c.live && !live) {
     return { tool: toolName, case: c.name, status: 'skipped', reason: 'live mode off' };
   }
+  const startedAt = Date.now();
   try {
     // Passing CallToolResultSchema validates the response at runtime against
     // the strict shape (which requires `content`). The static return type is
     // still a union with the legacy `toolResult` variant, so narrow with a
-    // runtime guard before handing the result to the case.
+    // runtime guard before handing the result to the case. The generous
+    // timeout lets the server's retry policy complete for live cases.
     const raw = await client.callTool(
       { name: toolName, arguments: c.arguments },
       CallToolResultSchema,
+      { timeout: CALL_TOOL_TIMEOUT_MS },
     );
     const result = toCallToolResult(raw, toolName);
     await c.assert({ toolName, arguments: c.arguments, result });
-    return { tool: toolName, case: c.name, status: 'passed' };
+    return {
+      tool: toolName,
+      case: c.name,
+      status: 'passed',
+      durationMs: Date.now() - startedAt,
+    };
   } catch (error) {
     return {
       tool: toolName,
       case: c.name,
       status: 'failed',
       reason: toMessage(error),
+      durationMs: Date.now() - startedAt,
     };
   }
 }

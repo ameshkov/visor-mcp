@@ -322,6 +322,21 @@
   constant at their 11 throw/`message:` sites instead of duplicating the
   `'Request cancelled'` literal, so the curated cancellation message
   cannot drift across layers.
+- The `mcp-tester` fixture runner now streams progress live in a
+  vitest-style format: it prints a tool group header when a tool begins,
+  then each case outcome (`✓` / `✗` / `↓` with per-case duration) the
+  moment it finishes, instead of buffering the entire breakdown until the
+  run completes, so slow live runs show progress immediately. A final
+  `Tools` / `Tests` / `Duration` summary replaces the old `Total:` line.
+  `report()` was split into `printProgress(event)` and
+  `printTotals(summaries, totalDurationMs)`; `runAll` accepts an optional
+  `onProgress` callback fed by a `ProgressEvent` type (`tool` / `case`)
+  in `fixtures/mcp-tester/src/types.ts`, and `CaseResult` gained a
+  `durationMs` field. ANSI color is emitted on a TTY (respecting
+  `NO_COLOR` / `FORCE_COLOR`) and disabled when piped. Each `tools/call`
+  now passes a generous `timeout` (180 s) so the server's full retry
+  policy (up to three attempts with backoff) can complete before the MCP
+  SDK raises `RequestTimeout` on transient provider failures.
 
 ### Fixed
 
@@ -356,3 +371,17 @@
 - Removed stale duplicate test files that imported the old flat
   `src/*.ts` layout, and corrected broken imports surfaced during the
   test relocation. The suite now passes end to end.
+- Updated the five stale `fixtures/mcp-tester/cases/*.case.ts` fixtures
+  (`ui_to_artifact`, `diagnose_error_screenshot`,
+  `extract_text_from_screenshot`, `ui_diff_check`,
+  `understand_technical_diagram`) to match the implemented tools. All
+  seven tools are now active, but these fixtures still asserted a "not yet
+  implemented" error, so their cases had been reaching the provider and
+  failing (some timing out at the MCP layer with `-32001`). Each fixture
+  now follows the established `analyze_image` /
+  `analyze_data_visualization` pattern: two non-live input-validation
+  cases (rejected image source, ignored unknown argument) that never
+  reach the provider, plus a `live: true` case that sends the tool's
+  sample PNG and asserts the response mentions a subject keyword via
+  `expectKeyword`. The `analyze_image` fixture JSDoc was also refreshed
+  to drop the stale "only tool with a real handler" wording.
