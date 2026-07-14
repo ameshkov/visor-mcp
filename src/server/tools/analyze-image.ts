@@ -24,6 +24,8 @@ Use this tool as a FALLBACK when none of the specialized tools (ui_to_artifact, 
 Do NOT use for: tasks that match one of the specialized tools above.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `analyze_image` tool.
  */
 export const ANALYZE_IMAGE_PROMPT = `# Analyze Image

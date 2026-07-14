@@ -27,6 +27,8 @@ Use this tool ONLY when the user has a screenshot containing text and wants that
 Do NOT use for: UI design conversion, error diagnosis, or diagram understanding.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `extract_text_from_screenshot` tool.
  */
 export const EXTRACT_TEXT_FROM_SCREENSHOT_PROMPT = `# Extract Text from Screenshot

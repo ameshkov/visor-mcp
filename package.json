@@ -26,7 +26,7 @@
     "format:fix": "prettier --write --no-error-on-unmatched-pattern --cache . && markdownlint-cli2 --fix .",
     "lint": "eslint src && pnpm knip",
     "lint:fix": "eslint src --fix",
-    "knip": "knip",
+    "knip": "knip --production",
     "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test",
     "prepare": "husky || true"
   },

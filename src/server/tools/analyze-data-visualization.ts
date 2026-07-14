@@ -27,6 +27,8 @@ Use this tool ONLY when the user has a data-visualization image and wants to und
 Do NOT use for: UI mockups, error screenshots, or technical architecture diagrams.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `analyze_data_visualization` tool.
  */
 export const ANALYZE_DATA_VISUALIZATION_PROMPT = `# Analyze Data Visualization

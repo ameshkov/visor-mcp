@@ -170,6 +170,25 @@
 
 ### Changed
 
+- Matched the GitHub Actions CI workflow to `mcp-compress-router`: added
+  `tags: ['v*']` push triggers for automated publishing and a `publish`
+  job that verifies the tag-version match, publishes to npm, and creates
+  a GitHub release via `softprops/action-gh-release@v2`. Publishing uses
+  npm Trusted Publishers (OIDC) so no npm token is required.
+- Switched the `knip` package script to `knip --production` so Knip
+  analyzes only production dependencies and source files, matching the
+  `mcp-compress-router` convention. Added `@internal` JSDoc tags to the
+  six per-tool prompt constants and the `TOOLS` array — all exported
+  solely for test files and not part of the public module API — to
+  satisfy the stricter production-only analysis.
+
+- Restructured `README.md` into a narrative user manual following the
+  `mcp-compress-router` style. Added Problem and Solution sections that
+  explain the motivation and value proposition. Added a Prerequisites
+  section, per-agent connection instructions (opencode, Claude Code, Codex,
+  GitHub Copilot), and a `ui_to_artifact` output_type reference table.
+  Moved internal architecture detail into a focused How It Works section
+  and consolidated all documentation links at the bottom.
 - Moved the shared retry and per-attempt timeout driver from
   `src/services/retry.ts` into a new `src/utils/` module with its own
   barrel (`src/utils/index.ts`). Retries and timeouts are cross-cutting

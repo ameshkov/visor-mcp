@@ -27,6 +27,8 @@ Use this tool ONLY when the user has an error screenshot and needs help understa
 Do NOT use for: code/UI extraction, general image analysis, or diagram understanding.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `diagnose_error_screenshot` tool.
  */
 export const DIAGNOSE_ERROR_SCREENSHOT_PROMPT = `# Diagnose Error Screenshot

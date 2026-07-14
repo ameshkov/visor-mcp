@@ -27,6 +27,8 @@ Use this tool ONLY when the user wants to compare an expected/reference UI with 
 Do NOT use for: general image comparison, error diagnosis, or analyzing a single UI.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `ui_diff_check` tool.
  */
 export const UI_DIFF_CHECK_PROMPT = `# UI Difference Check

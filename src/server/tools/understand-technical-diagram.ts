@@ -25,6 +25,8 @@ Use this tool ONLY when the user has a technical diagram and wants to understand
 Do NOT use for: UI screenshots, error messages, or data visualizations/charts.`;
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * System prompt for the `understand_technical_diagram` tool.
  */
 export const UNDERSTAND_TECHNICAL_DIAGRAM_PROMPT = `# Understand Technical Diagram

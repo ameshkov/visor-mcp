@@ -10,6 +10,8 @@ import { uiDiffCheck } from './ui-diff-check.js';
 import { uiToArtifact } from './ui-to-artifact.js';
 
 /**
+ * @internal Exported for tests only; not part of the public module API.
+ *
  * Catalog of every registered tool, in discovery order: the visual-
  * regression `ui_diff_check`, then the specialized tools, then the
  * general-purpose `analyze_image` fallback, with `analyze_data_visualization`
