@@ -6,7 +6,7 @@
   "type": "module",
   "main": "build/index.js",
   "bin": {
-    "visor-mcp": "./build/index.js"
+    "visor-mcp": "build/index.js"
   },
   "engines": {
     "node": ">=24",
