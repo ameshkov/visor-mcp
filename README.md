@@ -50,8 +50,20 @@ screenshots, creating code artifacts, comparing two images, and more!
 ## Quick Start
 
 Pass credentials when adding the server. The server is downloaded on first
-use via `npx`. See [Configuration](docs/configuration.md) for all settings,
-including optional environment variables and JSON config examples.
+use via `npx`.
+
+The MCP server requires at least these three env variables to be set:
+
+- `VISOR_MCP_BASE_URL` - Base URL for the chat completions API of the provider
+  of your choice. For instance, for OpenRouter it will be
+  `https://openrouter.ai/api/v1`.
+- `VISOR_MCP_API_KEY` - API key for the provider.
+- `VISOR_MCP_MODEL` - Model to use for vision analysis. Analysing images is
+  usually not an often task so you can use a relatively expensive model like
+  Sonnet/Opus or GPT Sol/Terra for that.
+
+See [Configuration](docs/configuration.md) for all settings, including optional
+environment variables and JSON config examples.
 
 ### MCP Compress Router
 
