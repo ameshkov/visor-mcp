@@ -47,6 +47,11 @@ screenshots, creating code artifacts, comparing two images, and more!
 
 <img src="docs/assets/visor-mcp-demo.png" alt="Visor MCP illustration working" width="600">
 
+> ![IMPORTANT]
+> Note that text-only models cannot see images attached to the chat in your
+> coding agent. You must instead specify a path to the image file (local or
+> remote) in the prompt.
+
 ## Quick Start
 
 Pass credentials when adding the server. The server is downloaded on first
