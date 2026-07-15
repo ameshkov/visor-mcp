@@ -529,7 +529,7 @@ UI mockups, error screenshots, or technical architecture diagrams.
 
 When provided, this value is injected into the user message as:
 
-```
+```text
 <prompt>
 
 <analysis_focus>Focus particularly on: <analysis_focus>.</analysis_focus>

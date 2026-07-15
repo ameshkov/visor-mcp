@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/ameshkov/visor-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ameshkov/visor-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/visor-mcp)](https://www.npmjs.com/package/visor-mcp)
+[![GitHub release](https://img.shields.io/github/v/release/ameshkov/visor-mcp)](https://github.com/ameshkov/visor-mcp/releases)
 
 > MCP server that adds vision capabilities to text-only models through any
 > OpenAI-compatible Chat Completions provider.
@@ -40,11 +41,37 @@ support. The server handles image loading, format validation, size
 limits, retries, timeouts, and cancellation — your agent just calls a
 tool and receives the result.
 
+Here's a demonstration of its basic capabilities. Depending on the task the
+model can use different tools besides just describing an image: diagnosing error
+screenshots, creating code artifacts, comparing two images, and more!
+
+<img src="docs/assets/visor-mcp-demo.png" alt="Visor MCP illustration working" width="600">
+
 ## Quick Start
 
 Pass credentials when adding the server. The server is downloaded on first
 use via `npx`. See [Configuration](docs/configuration.md) for all settings,
 including optional environment variables and JSON config examples.
+
+### MCP Compress Router
+
+[MCP Compress Router](https://github.com/ameshkov/mcp-compress-router)
+compresses all your MCP servers into a single router with just two tools
+(`get_tool_schema` and `invoke_tool`), saving up to 99% on token
+overhead. It acts as a proxy: instead of every server's full tool
+catalog being sent to the LLM on every request, the router exposes a
+compact listing and the model fetches schemas on demand.
+
+Register Visor MCP as a downstream server:
+
+```bash
+npx mcp-compress-router add visor-mcp \
+  --description "Vision analysis tools for screenshots, diagrams, and UI. Use it if you do not understand images natively." \
+  -e VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  -e VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  -e VISOR_MCP_MODEL=claude-sonnet-5 \
+  -- npx -y visor-mcp
+```
 
 ### OpenCode
 
@@ -108,25 +135,6 @@ Configuration`). See the
     "visor-mcp": {
       "command": "npx",
       "args": ["-y", "visor-mcp"],
-      "env": {
-        "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
-        "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",
-        "VISOR_MCP_MODEL": "claude-sonnet-5"
-      }
-    }
-  }
-}
-```
-
-**Local build:** point to the compiled entry point and set the working
-directory to the repository root so `.env` is found:
-
-```json
-{
-  "mcpServers": {
-    "visor-mcp": {
-      "command": "node",
-      "args": ["/absolute/path/to/build/index.js"],
       "env": {
         "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
         "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",

@@ -8,17 +8,26 @@ and this project adheres to
 
 ## [Unreleased]
 
+<!--
+  DO NOT REMOVE THIS COMMENT AND KEEP IT RIGHT ABOVE THE UNRELEASED CHANGES.
+  Add unreleased changes below to Added/Changed/Fixed (keep this order)
+  Keep unreleased section even when it's empty.
+-->
+
+## [v1.0.0] - 2026-07-15
+
 ### Added
 
 - Initial release of Visor MCP — an MCP server that adds vision
   capabilities to text-only LLMs via an OpenAI-compatible provider,
   exposing seven image-analysis tools.
-- Table of contents added to `docs/tools.md` and
-  `docs/configuration.md`.
 
-### Changed
-
-- Updated documentation examples to use `claude-sonnet-5` as the
-  example model name instead of `openai/gpt-4o`.
+<!--
+  DO NOT REMOVE THIS COMMENT.
+  Links to releases and unreleased.
+  Unreleased: changeset from the latest tag
+  Version: link to the tag details on Github
+-->
 
 [unreleased]: https://github.com/ameshkov/visor-mcp/compare/v1.0.0...HEAD
+[v1.0.0]: https://github.com/ameshkov/visor-mcp/releases/tag/v1.0.0
