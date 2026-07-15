@@ -12,7 +12,7 @@ const CASE_SUFFIX = '.case.ts';
 /**
  * Per-call timeout for `tools/call`, in ms. Generous on purpose: the server
  * retries transient provider failures up to twice (with 1s and 2s backoff)
- * and each attempt is bounded by its own `VISION_MCP_REQUEST_TIMEOUT_MS`,
+ * and each attempt is bounded by its own `VISOR_MCP_REQUEST_TIMEOUT_MS`,
  * so a fully retried call can take well over the MCP SDK's 60s default. This
  * lets the server's retry policy complete before the client raises
  * `RequestTimeout`.

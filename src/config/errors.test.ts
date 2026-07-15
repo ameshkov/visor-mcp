@@ -3,8 +3,8 @@ import { ConfigError, errorToolResult, formatStartupDiagnostic } from './errors.
 
 describe('formatStartupDiagnostic', () => {
   it('surfaces ConfigError messages verbatim with an Error prefix', () => {
-    const out = formatStartupDiagnostic(new ConfigError('VISION_MCP_API_KEY is required'));
-    expect(out).toBe('Error: VISION_MCP_API_KEY is required\n');
+    const out = formatStartupDiagnostic(new ConfigError('VISOR_MCP_API_KEY is required'));
+    expect(out).toBe('Error: VISOR_MCP_API_KEY is required\n');
   });
 
   it('reduces unknown errors to a generic sanitized message', () => {

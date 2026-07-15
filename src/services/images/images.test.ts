@@ -111,7 +111,7 @@ describe('loadImage local file', () => {
 describe('loadImage local file rejection', () => {
   it('rejects a missing file as not found', async () => {
     // An absolute path whose parent (`/`) exists but the file does not → ENOENT.
-    const missing = `/nonexistent-vision-mcp-${Date.now()}.png`;
+    const missing = `/nonexistent-visor-mcp-${Date.now()}.png`;
     await expect(loadImage(missing, 5, 60_000)).rejects.toThrow(/was not found/);
   });
 
@@ -127,7 +127,7 @@ describe('loadImage local file rejection', () => {
   });
 
   it('rejects a directory', async () => {
-    const dir = createTempDir('vision-mcp-dir-');
+    const dir = createTempDir('visor-mcp-dir-');
     try {
       await expect(loadImage(dir.path, 5, 60_000)).rejects.toThrow(/is not a file/);
     } finally {

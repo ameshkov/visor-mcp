@@ -10,13 +10,13 @@ export interface TempFile {
   cleanup(): void;
 }
 
-export function createTempDir(prefix = 'vision-mcp-'): TempFile {
+export function createTempDir(prefix = 'visor-mcp-'): TempFile {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   return { path: dir, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
 export function writeTempFile(data: Uint8Array, name = 'image.png'): TempFile {
-  const dir = createTempDir('vision-mcp-file-');
+  const dir = createTempDir('visor-mcp-file-');
   const filePath = join(dir.path, name);
   writeFileSync(filePath, data);
   return {

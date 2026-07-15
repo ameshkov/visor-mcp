@@ -1,12 +1,12 @@
 {
-  "name": "vision-mcp",
+  "name": "visor-mcp",
   "version": "0.1.0",
   "description": "An MCP server that provides vision tools to text-only models",
   "license": "MIT",
   "type": "module",
   "main": "build/index.js",
   "bin": {
-    "vision-mcp": "./build/index.js"
+    "visor-mcp": "./build/index.js"
   },
   "engines": {
     "node": ">=24",

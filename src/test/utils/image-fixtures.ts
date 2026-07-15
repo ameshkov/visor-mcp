@@ -14,7 +14,7 @@ export const TINY_PNG_BASE64 =
 export const TINY_PNG_DATA_URL = `data:image/png;base64,${TINY_PNG_BASE64}`;
 
 export const baseEnv: NodeJS.ProcessEnv = Object.fromEntries(
-  Object.entries(process.env).filter(([k]) => !k.startsWith('VISION_MCP_')),
+  Object.entries(process.env).filter(([k]) => !k.startsWith('VISOR_MCP_')),
 ) as NodeJS.ProcessEnv;
 
 export const TINY_PNG_BYTES: Readonly<Uint8Array> = Uint8Array.from(

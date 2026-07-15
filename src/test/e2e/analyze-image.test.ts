@@ -44,9 +44,9 @@ afterEach(async () => {
 function envFor(baseUrl: string): NodeJS.ProcessEnv {
   return {
     ...baseEnv,
-    VISION_MCP_API_KEY: 'test-key',
-    VISION_MCP_BASE_URL: baseUrl,
-    VISION_MCP_MODEL: 'test-model',
+    VISOR_MCP_API_KEY: 'test-key',
+    VISOR_MCP_BASE_URL: baseUrl,
+    VISOR_MCP_MODEL: 'test-model',
   };
 }
 
@@ -154,7 +154,7 @@ describe('analyze_image over stdio', () => {
   }, 20000);
 
   it('rejects a directory path without calling the provider', async () => {
-    const dir = createTempDir('vision-mcp-int-');
+    const dir = createTempDir('visor-mcp-int-');
     try {
       mock = await startMockProvider();
       child = spawnServer(envFor(mock.url));
@@ -183,7 +183,7 @@ describe('analyze_image over stdio', () => {
     const call = await request(child, read, 'tools/call', {
       name: 'analyze_image',
       arguments: {
-        image_source: `/nonexistent-vision-mcp-${Date.now()}.png`,
+        image_source: `/nonexistent-visor-mcp-${Date.now()}.png`,
         prompt: 'describe this image',
       },
     });

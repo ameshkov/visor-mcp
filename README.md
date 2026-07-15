@@ -1,20 +1,19 @@
-# Vision MCP
+# Visor MCP
 
-[![CI](https://github.com/ameshkov/vision-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ameshkov/vision-mcp/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/vision-mcp)](https://www.npmjs.com/package/vision-mcp)
+[![CI](https://github.com/ameshkov/visor-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ameshkov/visor-mcp/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/visor-mcp)](https://www.npmjs.com/package/visor-mcp)
 
 > MCP server that adds vision capabilities to text-only models through any
 > OpenAI-compatible Chat Completions provider.
 
 <p align="center">
-  <img src="docs/assets/vision-mcp.png" alt="Vision MCP illustration" width="600">
+  <img src="docs/assets/visor-mcp.png" alt="Visor MCP illustration" width="600">
 </p>
 
 ## Table of Contents
 
 - [The Problem](#the-problem)
 - [The Solution](#the-solution)
-- [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Tools](#tools)
 - [License & Attribution](#license--attribution)
@@ -31,7 +30,7 @@ code", or "what trends do you see in this chart?".
 
 ## The Solution
 
-Vision MCP is an MCP server that bridges this gap. It accepts an image from
+Visor MCP is an MCP server that bridges this gap. It accepts an image from
 your coding agent — a data URL, a local file path, or a remote HTTP URL —
 and forwards it to an OpenAI-compatible vision provider. The provider analyzes
 the image and returns a text response that flows back to your agent.
@@ -47,6 +46,8 @@ Pass credentials when adding the server. The server is downloaded on first
 use via `npx`. See [Configuration](docs/configuration.md) for all settings,
 including optional environment variables and JSON config examples.
 
+### OpenCode
+
 **opencode:** add to your `opencode.json` config file. See the
 [opencode MCP servers docs](https://opencode.ai/docs/mcp-servers/).
 
@@ -54,41 +55,47 @@ including optional environment variables and JSON config examples.
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "vision-mcp": {
+    "visor-mcp": {
       "type": "local",
-      "command": ["npx", "-y", "vision-mcp"],
+      "command": ["npx", "-y", "visor-mcp"],
       "environment": {
-        "VISION_MCP_API_KEY": "sk-or-v1-your-key-here",
-        "VISION_MCP_BASE_URL": "https://openrouter.ai/api/v1",
-        "VISION_MCP_MODEL": "openai/gpt-4o"
+        "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
+        "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",
+        "VISOR_MCP_MODEL": "claude-sonnet-5"
       }
     }
   }
 }
 ```
 
+### Claude Code
+
 **Claude Code:** see the
 [Claude Code MCP docs](https://code.claude.com/docs/en/mcp).
 
 ```bash
-claude mcp add vision-mcp \
-  --env VISION_MCP_API_KEY=sk-or-v1-your-key-here \
-  --env VISION_MCP_BASE_URL=https://openrouter.ai/api/v1 \
-  --env VISION_MCP_MODEL=openai/gpt-4o \
+claude mcp add visor-mcp \
+  --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  --env VISOR_MCP_MODEL=claude-sonnet-5 \
   --transport stdio \
-  -- npx -y vision-mcp
+  -- npx -y visor-mcp
 ```
+
+### Codex
 
 **Codex:** see the
 [Codex MCP docs](https://developers.openai.com/codex/mcp).
 
 ```bash
-codex mcp add vision-mcp \
-  --env VISION_MCP_API_KEY=sk-or-v1-your-key-here \
-  --env VISION_MCP_BASE_URL=https://openrouter.ai/api/v1 \
-  --env VISION_MCP_MODEL=openai/gpt-4o \
-  -- npx -y vision-mcp
+codex mcp add visor-mcp \
+  --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  --env VISOR_MCP_MODEL=claude-sonnet-5 \
+  -- npx -y visor-mcp
 ```
+
+### Copilot
 
 **GitHub Copilot (VS Code):** add to `.vscode/mcp.json` in your workspace,
 or to your user-level MCP settings (Command Palette → `MCP: Open User
@@ -98,13 +105,13 @@ Configuration`). See the
 ```json
 {
   "servers": {
-    "vision-mcp": {
+    "visor-mcp": {
       "command": "npx",
-      "args": ["-y", "vision-mcp"],
+      "args": ["-y", "visor-mcp"],
       "env": {
-        "VISION_MCP_API_KEY": "sk-or-v1-your-key-here",
-        "VISION_MCP_BASE_URL": "https://openrouter.ai/api/v1",
-        "VISION_MCP_MODEL": "openai/gpt-4o"
+        "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
+        "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",
+        "VISOR_MCP_MODEL": "claude-sonnet-5"
       }
     }
   }
@@ -117,13 +124,13 @@ directory to the repository root so `.env` is found:
 ```json
 {
   "mcpServers": {
-    "vision-mcp": {
+    "visor-mcp": {
       "command": "node",
       "args": ["/absolute/path/to/build/index.js"],
       "env": {
-        "VISION_MCP_API_KEY": "sk-or-v1-your-key-here",
-        "VISION_MCP_BASE_URL": "https://openrouter.ai/api/v1",
-        "VISION_MCP_MODEL": "openai/gpt-4o"
+        "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
+        "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",
+        "VISOR_MCP_MODEL": "claude-sonnet-5"
       }
     }
   }

@@ -33,9 +33,9 @@ afterEach(async () => {
 function envFor(baseUrl: string): NodeJS.ProcessEnv {
   return {
     ...baseEnv,
-    VISION_MCP_API_KEY: 'test-key',
-    VISION_MCP_BASE_URL: baseUrl,
-    VISION_MCP_MODEL: 'test-model',
+    VISOR_MCP_API_KEY: 'test-key',
+    VISOR_MCP_BASE_URL: baseUrl,
+    VISOR_MCP_MODEL: 'test-model',
   };
 }
 

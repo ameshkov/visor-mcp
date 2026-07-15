@@ -24,20 +24,20 @@ const FORBIDDEN_ANYWHERE = new Set(['__proto__', 'prototype', 'constructor']);
 
 export function loadConfig(options: LoadConfigOptions): ServerConfig {
   const merged = mergeEnv(options.env, loadEnvFile(options.cwd));
-  const apiKey = requireString(merged, 'VISION_MCP_API_KEY');
-  const baseUrl = validateBaseUrl(merged.VISION_MCP_BASE_URL);
-  const model = requireString(merged, 'VISION_MCP_MODEL');
+  const apiKey = requireString(merged, 'VISOR_MCP_API_KEY');
+  const baseUrl = validateBaseUrl(merged.VISOR_MCP_BASE_URL);
+  const model = requireString(merged, 'VISOR_MCP_MODEL');
   const maxImageSizeMb = parsePositiveNumber(
-    merged.VISION_MCP_MAX_IMAGE_SIZE_MB,
+    merged.VISOR_MCP_MAX_IMAGE_SIZE_MB,
     5,
-    'VISION_MCP_MAX_IMAGE_SIZE_MB',
+    'VISOR_MCP_MAX_IMAGE_SIZE_MB',
   );
   const requestTimeoutMs = parsePositiveInteger(
-    merged.VISION_MCP_REQUEST_TIMEOUT_MS,
+    merged.VISOR_MCP_REQUEST_TIMEOUT_MS,
     60_000,
-    'VISION_MCP_REQUEST_TIMEOUT_MS',
+    'VISOR_MCP_REQUEST_TIMEOUT_MS',
   );
-  const requestBodyExtras = parseRequestExtras(merged.VISION_MCP_REQUEST_BODY_JSON);
+  const requestBodyExtras = parseRequestExtras(merged.VISOR_MCP_REQUEST_BODY_JSON);
   return Object.freeze<ServerConfig>({
     apiKey,
     baseUrl,
@@ -76,16 +76,16 @@ function requireString(env: Record<string, string | undefined>, name: string): s
 
 function validateBaseUrl(raw: string | undefined): string {
   if (raw === undefined || raw.trim().length === 0) {
-    throw new ConfigError('VISION_MCP_BASE_URL is required');
+    throw new ConfigError('VISOR_MCP_BASE_URL is required');
   }
   let url: URL;
   try {
     url = new URL(raw);
   } catch {
-    throw new ConfigError('VISION_MCP_BASE_URL must be a valid URL');
+    throw new ConfigError('VISOR_MCP_BASE_URL must be a valid URL');
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new ConfigError('VISION_MCP_BASE_URL must use http or https');
+    throw new ConfigError('VISOR_MCP_BASE_URL must use http or https');
   }
   return raw;
 }
@@ -120,10 +120,10 @@ function parseRequestExtras(raw: string | undefined): Readonly<Record<string, un
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new ConfigError('VISION_MCP_REQUEST_BODY_JSON must be valid JSON');
+    throw new ConfigError('VISOR_MCP_REQUEST_BODY_JSON must be valid JSON');
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new ConfigError('VISION_MCP_REQUEST_BODY_JSON must be a JSON object');
+    throw new ConfigError('VISOR_MCP_REQUEST_BODY_JSON must be a JSON object');
   }
   const obj = parsed as Record<string, unknown>;
   assertNoProtectedTopLevel(obj);
@@ -134,7 +134,7 @@ function parseRequestExtras(raw: string | undefined): Readonly<Record<string, un
 function assertNoProtectedTopLevel(obj: Record<string, unknown>): void {
   for (const key of Object.keys(obj)) {
     if (PROTECTED_TOP_LEVEL.has(key)) {
-      throw new ConfigError('VISION_MCP_REQUEST_BODY_JSON contains a protected key');
+      throw new ConfigError('VISOR_MCP_REQUEST_BODY_JSON contains a protected key');
     }
   }
 }
@@ -148,7 +148,7 @@ function assertNoForbiddenKeysDeep(value: unknown): void {
   const obj = value as Record<string, unknown>;
   for (const key of Object.getOwnPropertyNames(obj)) {
     if (FORBIDDEN_ANYWHERE.has(key)) {
-      throw new ConfigError('VISION_MCP_REQUEST_BODY_JSON contains a forbidden key');
+      throw new ConfigError('VISOR_MCP_REQUEST_BODY_JSON contains a forbidden key');
     }
     assertNoForbiddenKeysDeep(obj[key]);
   }

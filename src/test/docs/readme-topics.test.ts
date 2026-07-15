@@ -4,12 +4,12 @@ import { resolve } from 'node:path';
 
 const readme = readFileSync(resolve(process.cwd(), 'README.md'), 'utf8');
 
-const REQUIRED_ENV_VARS = ['VISION_MCP_API_KEY', 'VISION_MCP_BASE_URL', 'VISION_MCP_MODEL'];
+const REQUIRED_ENV_VARS = ['VISOR_MCP_API_KEY', 'VISOR_MCP_BASE_URL', 'VISOR_MCP_MODEL'];
 
 const OPTIONAL_ENV_VARS = [
-  'VISION_MCP_MAX_IMAGE_SIZE_MB',
-  'VISION_MCP_REQUEST_TIMEOUT_MS',
-  'VISION_MCP_REQUEST_BODY_JSON',
+  'VISOR_MCP_MAX_IMAGE_SIZE_MB',
+  'VISOR_MCP_REQUEST_TIMEOUT_MS',
+  'VISOR_MCP_REQUEST_BODY_JSON',
 ];
 
 const TOOLS = [
@@ -60,7 +60,7 @@ describe('README operator guide', () => {
   });
 
   it('documents quick-start and MCP host setup', () => {
-    expect(readme).toContain('vision-mcp');
+    expect(readme).toContain('visor-mcp');
   });
 
   it('links to agent MCP documentation for each host', () => {

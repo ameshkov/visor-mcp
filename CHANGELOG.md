@@ -8,13 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [v1.0.0] - 2026-07-15
-
 ### Added
 
-- Initial release of Vision MCP — an MCP server that adds vision
+- Initial release of Visor MCP — an MCP server that adds vision
   capabilities to text-only LLMs via an OpenAI-compatible provider,
   exposing seven image-analysis tools.
 
-[unreleased]: https://github.com/ameshkov/vision-mcp/compare/v1.0.0...HEAD
-[v1.0.0]: https://github.com/ameshkov/vision-mcp/releases/tag/v1.0.0
+### Changed
+
+- Updated documentation examples to use `claude-sonnet-5` as the
+  example model name instead of `openai/gpt-4o`.
+
+[unreleased]: https://github.com/ameshkov/visor-mcp/compare/v1.0.0...HEAD

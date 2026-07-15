@@ -1,6 +1,6 @@
 # Development
 
-This guide is for developers setting up the `vision-mcp` repository for
+This guide is for developers setting up the `visor-mcp` repository for
 the first time. It covers environment setup, local execution, the
 contribution workflow, and common tasks. For architecture and code
 guidelines, see [AGENTS.md](AGENTS.md); for the operator guide
@@ -52,8 +52,8 @@ Install the following before starting:
 ### Clone and Install Dependencies
 
 ```bash
-git clone <repository-url> vision-mcp
-cd vision-mcp
+git clone <repository-url> visor-mcp
+cd visor-mcp
 pnpm install
 ```
 
@@ -71,30 +71,30 @@ There is no `.env.example` at the repository root, so create the file
 yourself:
 
 ```bash
-VISION_MCP_API_KEY=your-api-key
-VISION_MCP_BASE_URL=https://api.openai.com/v1
-VISION_MCP_MODEL=gpt-4o
+VISOR_MCP_API_KEY=your-api-key
+VISOR_MCP_BASE_URL=https://api.openai.com/v1
+VISOR_MCP_MODEL=claude-sonnet-5
 # Optional:
-# VISION_MCP_MAX_IMAGE_SIZE_MB=5
-# VISION_MCP_REQUEST_TIMEOUT_MS=60000
-# VISION_MCP_REQUEST_BODY_JSON={"temperature":0.2}
+# VISOR_MCP_MAX_IMAGE_SIZE_MB=5
+# VISOR_MCP_REQUEST_TIMEOUT_MS=60000
+# VISOR_MCP_REQUEST_BODY_JSON={"temperature":0.2}
 ```
 
 Required variables:
 
 | Variable | Description |
 | --- | --- |
-| `VISION_MCP_API_KEY` | API key for the provider |
-| `VISION_MCP_BASE_URL` | Provider base URL (http or https) |
-| `VISION_MCP_MODEL` | Model name used for vision calls |
+| `VISOR_MCP_API_KEY` | API key for the provider |
+| `VISOR_MCP_BASE_URL` | Provider base URL (http or https) |
+| `VISOR_MCP_MODEL` | Model name used for vision calls |
 
 Optional variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `VISION_MCP_MAX_IMAGE_SIZE_MB` | `5` | Maximum accepted image size in MB |
-| `VISION_MCP_REQUEST_TIMEOUT_MS` | `60000` | Per-attempt timeout in ms applied independently to each provider request and each HTTP image download (not a total-call timeout — each retry attempt gets a fresh timer) |
-| `VISION_MCP_REQUEST_BODY_JSON` | `{}` | Extra JSON merged into the request body (cannot set `model`, `messages`, or `stream`) |
+| `VISOR_MCP_MAX_IMAGE_SIZE_MB` | `5` | Maximum accepted image size in MB |
+| `VISOR_MCP_REQUEST_TIMEOUT_MS` | `60000` | Per-attempt timeout in ms applied independently to each provider request and each HTTP image download (not a total-call timeout — each retry attempt gets a fresh timer) |
+| `VISOR_MCP_REQUEST_BODY_JSON` | `{}` | Extra JSON merged into the request body (cannot set `model`, `messages`, or `stream`) |
 
 If a required variable is missing or invalid, the server exits with
 code `1` and writes a diagnostic to stderr.
@@ -233,7 +233,7 @@ pnpm typecheck
 
 ### Debug the MCP Server
 
-You can debug the vision-mcp server through `mcp-tester` from VSCode by
+You can debug the visor-mcp server through `mcp-tester` from VSCode by
 relying on the tester's full env forwarding (`serverEnv()` in
 `fixtures/mcp-tester/src/config.ts`): a `launch.json` with
 `autoAttachChildProcesses: true` auto-attaches to the spawned server as
@@ -256,9 +256,9 @@ gitignored). Recommended setup:
 ## Troubleshooting
 
 - **`Startup failed: invalid configuration`** — a required environment
-  variable is missing or invalid. Ensure `VISION_MCP_API_KEY`,
-  `VISION_MCP_BASE_URL`, and `VISION_MCP_MODEL` are set in your
-  `.env`. `VISION_MCP_BASE_URL` must be a valid `http`/`https` URL.
+  variable is missing or invalid. Ensure `VISOR_MCP_API_KEY`,
+  `VISOR_MCP_BASE_URL`, and `VISOR_MCP_MODEL` are set in your
+  `.env`. `VISOR_MCP_BASE_URL` must be a valid `http`/`https` URL.
 - **The server starts but seems to hang** — this is expected. The server
   speaks JSON-RPC over stdio and waits for client input on stdin. Drive
   it with an MCP client or the E2E tester rather than typing into the

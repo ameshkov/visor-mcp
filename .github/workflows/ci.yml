@@ -115,4 +115,4 @@ jobs:
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
-          files: vision-mcp-*.tgz
+          files: visor-mcp-*.tgz

@@ -46,7 +46,7 @@ bytes.
 ### Size Limit
 
 5 MB per image by default, configurable via
-`VISION_MCP_MAX_IMAGE_SIZE_MB`. The limit applies uniformly to local
+`VISOR_MCP_MAX_IMAGE_SIZE_MB`. The limit applies uniformly to local
 files, remote responses, and data URLs — reading, decoding, or
 downloading stops immediately when the limit is exceeded.
 

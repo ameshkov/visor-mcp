@@ -3,9 +3,9 @@ import { baseEnv, spawnServer, lineReader, request, init, kill } from '../utils/
 
 const validEnv: NodeJS.ProcessEnv = {
   ...baseEnv,
-  VISION_MCP_API_KEY: 'test-key',
-  VISION_MCP_BASE_URL: 'https://example.test/v1',
-  VISION_MCP_MODEL: 'test-model',
+  VISOR_MCP_API_KEY: 'test-key',
+  VISOR_MCP_BASE_URL: 'https://example.test/v1',
+  VISOR_MCP_MODEL: 'test-model',
 };
 
 describe('stdio discovery', () => {
@@ -118,9 +118,9 @@ describe('stdio startup failure', () => {
   it('exits nonzero with stderr only when a required value is missing', async () => {
     const child = spawnServer({
       ...baseEnv,
-      VISION_MCP_API_KEY: '',
-      VISION_MCP_BASE_URL: 'https://example.test/v1',
-      VISION_MCP_MODEL: 'test-model',
+      VISOR_MCP_API_KEY: '',
+      VISOR_MCP_BASE_URL: 'https://example.test/v1',
+      VISOR_MCP_MODEL: 'test-model',
     });
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
@@ -135,9 +135,9 @@ describe('stdio startup failure', () => {
   it('does not leak the API key in stderr on invalid configuration', async () => {
     const child = spawnServer({
       ...baseEnv,
-      VISION_MCP_API_KEY: 'secret-key-value',
-      VISION_MCP_BASE_URL: 'ftp://example.test',
-      VISION_MCP_MODEL: 'test-model',
+      VISOR_MCP_API_KEY: 'secret-key-value',
+      VISOR_MCP_BASE_URL: 'ftp://example.test',
+      VISOR_MCP_MODEL: 'test-model',
     });
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];

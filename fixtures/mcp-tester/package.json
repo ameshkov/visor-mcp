@@ -2,7 +2,7 @@
   "name": "mcp-tester",
   "version": "0.0.0",
   "private": true,
-  "description": "E2E fixture runner for the vision-mcp MCP server",
+  "description": "E2E fixture runner for the visor-mcp MCP server",
   "type": "module",
   "engines": {
     "node": ">=24"

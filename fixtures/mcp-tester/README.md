@@ -1,6 +1,6 @@
 # mcp-tester
 
-End-to-end fixture runner for the `vision-mcp` server. It spawns the server
+End-to-end fixture runner for the `visor-mcp` server. It spawns the server
 as a child process, connects an MCP SDK `Client` over stdio (the same library
 approach the [MCP Inspector][inspector] uses internally), discovers the
 advertised tools, and runs one TypeScript fixture per tool.
@@ -10,7 +10,7 @@ advertised tools, and runs one TypeScript fixture per tool.
 ## What it does
 
 1. Loads configuration from `.env` (dotenv).
-2. Spawns the vision-mcp server with the resolved environment.
+2. Spawns the visor-mcp server with the resolved environment.
 3. Connects an MCP `Client` over `StdioClientTransport`.
 4. Calls `client.listTools()` to discover every advertised tool.
 5. Imports every `cases/*.case.ts` file and runs each fixture's cases
@@ -20,7 +20,7 @@ advertised tools, and runs one TypeScript fixture per tool.
 ## Prerequisites
 
 - Node.js 24 or later
-- The parent `vision-mcp` repository built at `build/index.js` (run
+- The parent `visor-mcp` repository built at `build/index.js` (run
   `pnpm build` from the repo root), or override the launch command via
   `MCP_TESTER_SERVER_*`.
 
@@ -31,12 +31,12 @@ From the `fixtures/mcp-tester/` directory:
 ```bash
 pnpm install
 cp .env.example .env
-# Fill in VISION_MCP_API_KEY, VISION_MCP_BASE_URL, VISION_MCP_MODEL in .env
+# Fill in VISOR_MCP_API_KEY, VISOR_MCP_BASE_URL, VISOR_MCP_MODEL in .env
 ```
 
 The `.env` file is the single source of truth for both the tester and the
 spawned server: the tester loads it with dotenv and forwards every
-`VISION_MCP_*` value to the server process, so the server does not need its
+`VISOR_MCP_*` value to the server process, so the server does not need its
 own `.env`.
 
 ## Running
@@ -56,14 +56,14 @@ pnpm start:live
 ## Configuration
 
 All values are read from `.env` (or the process environment, which takes
-precedence). Server settings (`VISION_MCP_*`) are forwarded to the spawned
+precedence). Server settings (`VISOR_MCP_*`) are forwarded to the spawned
 server unchanged.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `VISION_MCP_API_KEY` | (none) | Provider API key forwarded to the server. |
-| `VISION_MCP_BASE_URL` | (none) | Provider base URL forwarded to the server. |
-| `VISION_MCP_MODEL` | (none) | Model name forwarded to the server. |
+| `VISOR_MCP_API_KEY` | (none) | Provider API key forwarded to the server. |
+| `VISOR_MCP_BASE_URL` | (none) | Provider base URL forwarded to the server. |
+| `VISOR_MCP_MODEL` | (none) | Model name forwarded to the server. |
 | `MCP_TESTER_SERVER_COMMAND` | `node` | Executable used to launch the server. |
 | `MCP_TESTER_SERVER_ARGS` | `build/index.js` | Args for the command. JSON array or whitespace-separated. |
 | `MCP_TESTER_SERVER_CWD` | repo root | Working directory for the spawned server. |
@@ -83,7 +83,7 @@ pnpm start
 
 ## Debugging
 
-You can debug the vision-mcp server while the tester drives it by letting
+You can debug the visor-mcp server while the tester drives it by letting
 VSCode auto-attach to the spawned server process. The tester forwards its
 entire environment to the server (`serverEnv()` in `src/config.ts`), so the
 `NODE_OPTIONS`/`VSCODE_INSPECTOR_OPTIONS` variables VSCode injects for
@@ -127,8 +127,8 @@ provider calls. This is what makes the config useful for debugging:
 every tool has a live case that exercises its real handler end to end by
 sending a sample image and asserting the response mentions a subject
 keyword; the non-live cases cover only input validation, so they run
-without an API key. Live mode requires valid `VISION_MCP_API_KEY`,
-`VISION_MCP_BASE_URL`, and `VISION_MCP_MODEL` in `.env`, and each run
+without an API key. Live mode requires valid `VISOR_MCP_API_KEY`,
+`VISOR_MCP_BASE_URL`, and `VISOR_MCP_MODEL` in `.env`, and each run
 makes a real (billable) provider call per tool. Remove the
 `MCP_TESTER_LIVE` line to debug the non-live paths instead.
 
@@ -148,7 +148,7 @@ Things to know:
 - `.vscode/` is gitignored at the repository root, so `launch.json` stays
   local to your machine and is not shared through git.
 - The directory's `.env` remains the single source of truth for provider
-  credentials; the config forwards `VISION_MCP_*` to the server through
+  credentials; the config forwards `VISOR_MCP_*` to the server through
   the tester's normal env forwarding, so no extra wiring is needed.
 
 ## Fixtures
@@ -284,7 +284,7 @@ fixtures/mcp-tester/
 
 Server stderr is captured and appended to the error message when the
 client fails to initialize, which makes provider-configuration failures
-(e.g. a missing `VISION_MCP_API_KEY`) easy to diagnose.
+(e.g. a missing `VISOR_MCP_API_KEY`) easy to diagnose.
 
 ## Development
 

@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 /** Root of the tester package (`fixtures/mcp-tester/`). */
 export const TESTER_ROOT = resolve(HERE, '..');
 
-/** Root of the vision-mcp repository that this tester exercises. */
+/** Root of the visor-mcp repository that this tester exercises. */
 export const REPO_ROOT = resolve(HERE, '..', '..', '..');
 
 /** Resolved test configuration loaded from `.env` and `process.env`. */
@@ -43,7 +43,7 @@ export function loadTesterConfig(): TesterConfig {
 
 /**
  * Build the environment passed to the spawned server. The server's own
- * `loadConfig` step reads `VISION_MCP_*` variables, so we forward the whole
+ * `loadConfig` step reads `VISOR_MCP_*` variables, so we forward the whole
  * resolved environment (env file values merged onto `process.env`) to make
  * the tester's `.env` the single source of truth.
  */

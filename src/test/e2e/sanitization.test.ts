@@ -48,10 +48,10 @@ describe('startup failure redacts configured secrets from stderr and keeps stdou
     const EXTRAS_SENTINEL = 'STARTUP-EXTRAS-SENTINEL';
     child = spawnServer({
       ...baseEnv,
-      VISION_MCP_API_KEY: API_KEY_SENTINEL,
-      VISION_MCP_BASE_URL: 'ftp://invalid.scheme.test',
-      VISION_MCP_MODEL: MODEL_SENTINEL,
-      VISION_MCP_REQUEST_BODY_JSON: `{"reasoning_effort":"high","marker":"${EXTRAS_SENTINEL}"}`,
+      VISOR_MCP_API_KEY: API_KEY_SENTINEL,
+      VISOR_MCP_BASE_URL: 'ftp://invalid.scheme.test',
+      VISOR_MCP_MODEL: MODEL_SENTINEL,
+      VISOR_MCP_REQUEST_BODY_JSON: `{"reasoning_effort":"high","marker":"${EXTRAS_SENTINEL}"}`,
     });
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
@@ -78,11 +78,11 @@ function envWithSentinels(
 ): NodeJS.ProcessEnv {
   return {
     ...baseEnv,
-    VISION_MCP_API_KEY: 'sk-CONFIG-APIKEY-SENTINEL',
-    VISION_MCP_BASE_URL: providerBaseUrl,
-    VISION_MCP_MODEL: 'CONFIG-MODEL-SENTINEL',
+    VISOR_MCP_API_KEY: 'sk-CONFIG-APIKEY-SENTINEL',
+    VISOR_MCP_BASE_URL: providerBaseUrl,
+    VISOR_MCP_MODEL: 'CONFIG-MODEL-SENTINEL',
     ...(opts.timeoutMs !== undefined
-      ? { VISION_MCP_REQUEST_TIMEOUT_MS: String(opts.timeoutMs) }
+      ? { VISOR_MCP_REQUEST_TIMEOUT_MS: String(opts.timeoutMs) }
       : {}),
   };
 }

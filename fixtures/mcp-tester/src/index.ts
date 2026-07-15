@@ -4,7 +4,7 @@ import { loadFixtures, runAll } from './runner.js';
 import { printProgress, printTotals } from './report.js';
 
 /**
- * Entry point. Loads `.env`, spawns the vision-mcp server, discovers its
+ * Entry point. Loads `.env`, spawns the visor-mcp server, discovers its
  * tools, runs every matching `*.case.ts` fixture, prints a summary, and sets
  * a nonzero exit code when any case failed.
  */

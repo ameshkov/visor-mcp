@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Vision MCP is an MCP server that provides vision capabilities to
+Visor MCP is an MCP server that provides vision capabilities to
 text-only models through OpenAI-compatible providers. It exposes seven
 tools for image analysis, all fully implemented: `analyze_image`,
 `ui_to_artifact`, `extract_text_from_screenshot`,
@@ -24,7 +24,7 @@ tools for image analysis, all fully implemented: `analyze_image`,
 
 ## Project Overview
 
-Vision MCP is a Model Context Protocol server that adds vision
+Visor MCP is a Model Context Protocol server that adds vision
 capabilities to text-only LLMs by forwarding image-analysis requests to
 an OpenAI-compatible Chat Completions endpoint. Instead of every model
 needing native vision support, this server acts as a proxy: it accepts
@@ -46,7 +46,7 @@ prompt, sends both to the provider, and returns the text response.
 ## Project Structure
 
 ```text
-vision-mcp/
+visor-mcp/
 ├── src/
 │   ├── index.ts          # Entry point: load config, create server, start stdio
 │   ├── config/           # Config loading + error formatting

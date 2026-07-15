@@ -12,7 +12,7 @@ interface VisionMcpServer {
 
 export function createServer(config: ServerConfig): VisionMcpServer {
   const mcp = new McpServer(
-    { name: 'vision-mcp', version: '0.1.0' },
+    { name: 'visor-mcp', version: '0.1.0' },
     { capabilities: { tools: {} } },
   );
   registerTools(mcp, config);
