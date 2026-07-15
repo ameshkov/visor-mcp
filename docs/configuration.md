@@ -17,6 +17,19 @@ precedence over `.env`.
 A missing or invalid required value writes `Error: <message>` to stderr,
 sets exit code 1, and exits without connecting to MCP.
 
+## Contents
+
+- [Example .env](#example-env)
+- [Passing Configuration to MCP Hosts](#passing-configuration-to-mcp-hosts)
+    - [One-liner (opencode, Claude Code, Codex)](#one-liner-opencode-claude-code-codex)
+    - [JSON Configuration](#json-configuration)
+    - [GitHub Copilot (VS Code)](#github-copilot-vs-code)
+    - [Global Install](#global-install)
+    - [Local Build](#local-build)
+- [Image Size Limit](#image-size-limit)
+- [Per-Attempt Timeout](#per-attempt-timeout)
+- [Request Body Extras](#request-body-extras)
+
 ## Example .env
 
 ```bash
