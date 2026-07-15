@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "An MCP server that provides vision tools to text-only models",
   "license": "MIT",
+  "author": "Andrey Meshkov <am@adguard.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ameshkov/visor-mcp"
+  },
+  "homepage": "https://github.com/ameshkov/visor-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/ameshkov/visor-mcp/issues"
+  },
   "type": "module",
   "main": "build/index.js",
   "bin": {
