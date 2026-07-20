@@ -18,6 +18,7 @@
 - [Quick Start](#quick-start)
 - [Tools](#tools)
 - [License & Attribution](#license--attribution)
+- [Documentation](#documentation)
 
 ---
 
@@ -84,32 +85,23 @@ Register Visor MCP as a downstream server:
 ```bash
 npx mcp-compress-router add visor-mcp \
   --description "Vision analysis tools for screenshots, diagrams, and UI. Use it if you do not understand images natively." \
-  -e VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
-  -e VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
-  -e VISOR_MCP_MODEL=claude-sonnet-5 \
+  --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  --env VISOR_MCP_MODEL=claude-sonnet-5 \
   -- npx -y visor-mcp
 ```
 
 ### OpenCode
 
-**opencode:** add to your `opencode.json` config file. See the
+**opencode:** see the
 [opencode MCP servers docs](https://opencode.ai/docs/mcp-servers/).
 
-```jsonc
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "visor-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "visor-mcp"],
-      "environment": {
-        "VISOR_MCP_API_KEY": "sk-or-v1-your-key-here",
-        "VISOR_MCP_BASE_URL": "https://openrouter.ai/api/v1",
-        "VISOR_MCP_MODEL": "claude-sonnet-5"
-      }
-    }
-  }
-}
+```bash
+opencode mcp add visor-mcp \
+  --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  --env VISOR_MCP_MODEL=claude-sonnet-5 \
+  -- npx -y visor-mcp
 ```
 
 ### Claude Code
@@ -119,10 +111,10 @@ npx mcp-compress-router add visor-mcp \
 
 ```bash
 claude mcp add visor-mcp \
+  --scope user \
   --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
   --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
   --env VISOR_MCP_MODEL=claude-sonnet-5 \
-  --transport stdio \
   -- npx -y visor-mcp
 ```
 

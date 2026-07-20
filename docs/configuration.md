@@ -45,13 +45,13 @@ VISOR_MCP_MODEL=claude-sonnet-5
 
 ### One-liner (opencode, Claude Code, Codex)
 
-Pass credentials with `-e` flags:
+Pass credentials with `--env` flags:
 
 ```bash
 opencode mcp add visor-mcp \
-  -e VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
-  -e VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
-  -e VISOR_MCP_MODEL=claude-sonnet-5 \
+  --env VISOR_MCP_API_KEY=sk-or-v1-your-key-here \
+  --env VISOR_MCP_BASE_URL=https://openrouter.ai/api/v1 \
+  --env VISOR_MCP_MODEL=claude-sonnet-5 \
   -- npx -y visor-mcp
 ```
 
@@ -80,7 +80,7 @@ other MCP-compatible agents), add this to your MCP settings file:
 ```
 
 All `VISOR_MCP_*` variables can go in the `env` object. The one-liner
-commands pass credentials with `-e` flags instead.
+commands pass credentials with `--env` flags instead.
 
 ### GitHub Copilot (VS Code)
 
